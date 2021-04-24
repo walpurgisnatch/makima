@@ -2,7 +2,8 @@
   :version "0.1.0"
   :author "Walpurgisnatch"
   :license "MIT"
-  :depends-on ("stepster")
+    :depends-on ("stepster"
+                 "local-time")
   :components ((:module "src"
                 :components
                 ((:file "watch-dog"))))
