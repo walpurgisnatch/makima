@@ -1,4 +1,4 @@
-(defpackage watch-dog
+(defpackage makima
   (:use :cl)
   (:import-from :utils
    :mkdir
@@ -8,10 +8,10 @@
   (:import-from :logger
                 :directory-setup
    :push-log)
-  (:import-from :watch-dog.hasher
+  (:import-from :makima.hasher
                 :hash))
 
-(in-package :watch-dog)
+(in-package :makima)
 
 (defvar *table* (make-hash-table))
 (defvar *root-dir* nil)
