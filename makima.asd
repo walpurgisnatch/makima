@@ -4,7 +4,8 @@
   :license "MIT"
   :depends-on ("stepster"
                "pero"
-               "local-time")
+               "local-time"
+               "ironclad")
   :components ((:module "src"
                 :serial t
                 :components
