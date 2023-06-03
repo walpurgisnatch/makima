@@ -1,12 +1,11 @@
-# Watch-Dog
+# Makima
 
 ## Usage
 
 ## Installation
 
-## Copyright
-
-Copyright (c) 2021 Walpurgisnatch
+### With roswell
+`ros install walpurgisnatch/makima`  
 
 ## License
 

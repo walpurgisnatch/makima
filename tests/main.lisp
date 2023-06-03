@@ -1,7 +1,7 @@
-(defpackage watch-dog/tests/main
+(defpackage makima/tests/main
   (:use :cl
-        :watch-dog
+        :makima
         :rove))
-(in-package :watch-dog/tests/main)
+(in-package :makima/tests/main)
 
-;; NOTE: To run this test file, execute `(asdf:test-system :watch-dog)' in your Lisp.
+;; NOTE: To run this test file, execute `(asdf:test-system :makima)' in your Lisp.
