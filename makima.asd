@@ -5,16 +5,17 @@
   :depends-on ("stepster"
                "pero"
                "local-time"
-               "ironclad"
-               "nail"
                "usocket"
                "cl-ppcre")
   :components ((:module "src"
                 :serial t
                 :components
                 ((:file "daemon")
+                 (:file "heart")
                  (:file "utils")
-                 (:file "sentry")
+                 (:file "predicates")
+                 (:file "system-watcher")
+                 (:file "html-watcher")
+                 (:file "sentry")                 
                  (:file "makima"))))
-  :description "Monitoring system"
-  :in-order-to ((test-op (test-op "makima/tests"))))
+  :description "Monitoring system")

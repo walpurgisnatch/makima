@@ -1,15 +1,24 @@
 (in-package :cl-user)
 (defpackage :makima.utils
   (:use :cl)
-  (:export :pathname-as-directory
+  (:export :shell
+           :pathname-as-directory
+           :merge-with-dir
            :mkdir
            :entry-exist
            :sethash
            :hash-page
-           :merge-with-dir
-           :shell))
+           :parse-float
+           :predicate-function
+           :predicate-args))
 
 (in-package :makima.utils)
+
+(defmacro list-or-car (&body body)
+  `(let ((data ,@body))
+     (if (cdr data)
+         data
+         (car data))))
 
 (defun shell (&rest args)
   (uiop:run-program (format nil "~{~a~^ ~}" args) :output :string))
@@ -51,9 +60,25 @@
 (defun entry-exist (key table)
   (nth-value 1 (gethash key table)))
 
-(defun hash-page (page)
-  (ironclad:byte-array-to-hex-string
-   (ironclad:digest-sequence
-    :md5
-    (ironclad:ascii-string-to-byte-array page))))
+(defun parse-float (string)
+  (declare (optimize (speed 3) (safety 2)))
+  (when (numberp string)
+    (return-from parse-float string))
+  (list-or-car
+    (let ((*read-eval* nil))
+      (with-input-from-string (stream string)
+        (loop for number = (read stream nil nil)
+              while (and number (numberp number)) collect number)))))
+
+(defun predicate-function (predicate)
+  (symbol-function (intern (string-upcase (car predicate)) 'makima)))
+
+(defun predicate-args (content predicate)
+  (cons content (cdr predicate)))
+
+;; (defun hash-page (page)
+;;   (ironclad:byte-array-to-hex-string
+;;    (ironclad:digest-sequence
+;;     :md5
+;;     (ironclad:ascii-string-to-byte-array page))))
 

@@ -1,10 +1,13 @@
 (defpackage makima
-  (:use :cl :makima.utils :makima.sentry)
+  (:use :cl
+        :makima.utils
+        :makima.sentry
+        :makima.heart
+        :makima.predicates)
   (:export :main))
 
 (in-package :makima)
 
-(defparameter *heartbeat* t)
 (defparameter *conf* nil)
 (defparameter *root-dir* "~/.makima")
 (defparameter *pages-dir* nil)
@@ -25,12 +28,15 @@
                         '(:error "ERROR~%~a~%"))
   (pero:create-template "content"
                         '(:changes "~a | was updated  with content [~a]")
+                        '(:trigger "~a | triggered by value [~a]")
                         '(:created "~a | was created with content [~a]"))
+  (pero:create-template "files" '(:file "~a | event was triggered"))
   (pero:create-template "pages" '(:updated "~a | Was updated")))
 
-(defun main (dir &optional (sleep-time 5))
+(defun main (&optional (sleep-time 5))
   ;(makima.daemon:daemonize :exit-parent t)
-  (setup dir)
+  (setup)
+  (print *heartbeat*)
   (pero:write-log :log "Heartbeat started")
   (loop while *heartbeat* do
     (run-all-checks)
@@ -38,11 +44,3 @@
   (pero:write-log :log "Heartbeat stoped")
   ;(makima.daemon:exit)
   )
-
-(defparameter times 40)
-
-(defun run-all-checks ()
-  (decf times)
-  (when (<= times 0) (setf *heartbeat* nil))
-  (check-for-content-updates))
-
