@@ -22,7 +22,7 @@
 (create-record "heart stopper" "~/makima/stop" '(probe-file) '(heart-stop))
 
 (defun file-check (name file predicate handler)
-  (when (apply (predicate-function predicate) (predicate-args file predicate))
+  (when (apply (predicate-function predicate) (predicate-args nil file predicate))
     (write-log :file name)
     (apply (predicate-function handler) (cdr handler))))
 

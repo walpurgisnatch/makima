@@ -10,7 +10,8 @@
            :hash-page
            :parse-float
            :predicate-function
-           :predicate-args))
+           :predicate-args
+           :handler-args))
 
 (in-package :makima.utils)
 
@@ -73,8 +74,11 @@
 (defun predicate-function (predicate)
   (symbol-function (intern (string-upcase (car predicate)) 'makima)))
 
-(defun predicate-args (content predicate)
-  (cons content (cdr predicate)))
+(defun predicate-args (last new predicate)
+  (remove-if #'null (concatenate 'list (list last new) (cdr predicate))))
+
+(defun handler-args (name last new handler)
+  (concatenate 'list `(,(list name last new)) (cdr handler)))
 
 ;; (defun hash-page (page)
 ;;   (ironclad:byte-array-to-hex-string

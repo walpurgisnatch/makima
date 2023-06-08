@@ -10,10 +10,11 @@
   :components ((:module "src"
                 :serial t
                 :components
-                ((:file "daemon")
-                 (:file "heart")
+                ((:file "daemon")                 
                  (:file "utils")
+                 (:file "heart")
                  (:file "predicates")
+                 (:file "handlers")
                  (:file "system-watcher")
                  (:file "html-watcher")
                  (:file "sentry")                 

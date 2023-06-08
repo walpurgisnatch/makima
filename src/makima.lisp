@@ -3,24 +3,16 @@
         :makima.utils
         :makima.sentry
         :makima.heart
-        :makima.predicates)
+        :makima.predicates
+        :makima.handlers)
   (:export :main))
 
 (in-package :makima)
 
-(defparameter *conf* nil)
 (defparameter *root-dir* "~/.makima")
-(defparameter *pages-dir* nil)
-(defparameter *data-dir* nil)
-
-(defstruct data
-  url
-  type
-  date
-  before
-  after)
 
 (defun setup ()
+  (parse-settings "../.env")
   (pero:logger-setup "~/makima")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"
@@ -36,7 +28,6 @@
 (defun main (&optional (sleep-time 5))
   ;(makima.daemon:daemonize :exit-parent t)
   (setup)
-  (print *heartbeat*)
   (pero:write-log :log "Heartbeat started")
   (loop while *heartbeat* do
     (run-all-checks)

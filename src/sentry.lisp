@@ -11,10 +11,6 @@
 
 (in-package :makima.sentry)
 
-(defparameter times 40)
-
 (defun run-all-checks ()
-  (decf times)
-  (when (<= times 0) (setf *heartbeat* nil))
   (check-for-html-updates)
   (check-system-files))
