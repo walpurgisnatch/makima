@@ -38,6 +38,8 @@
                               :once once)
                         *content*)))))
 
+(print (create-record "jahy-updated" "https://myanimelist.net/profile/Walpurgisnatch" "div.manga:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > span:nth-child(1)"  :handler '((log-update) (tg-message) (shell "touch" "~/makima-handler"))))
+
 (defun check-record (name page selector handler)
   (let* ((content (parse-content page selector))
          (current (gethash name *content*))
@@ -48,8 +50,12 @@
       (if (content-record-once current)
           (remhash name *content*)
           (update-record name current content))
-      (apply (predicate-function handler)
-             (handler-args name last-value content handler)))))
+      (handle handler name last-value content))))
+
+(defun handle (handlers name last content)
+  (loop for handler in handlers do
+    (apply (predicate-function handler)
+           (handler-args name last content handler))))
 
 (defun update-record (name current content)
   (setf (content-record-content current) content)

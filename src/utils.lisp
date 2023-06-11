@@ -1,8 +1,7 @@
 (in-package :cl-user)
 (defpackage :makima.utils
   (:use :cl)
-  (:export :shell
-           :pathname-as-directory
+  (:export :pathname-as-directory
            :merge-with-dir
            :mkdir
            :entry-exist
@@ -20,9 +19,6 @@
      (if (cdr data)
          data
          (car data))))
-
-(defun shell (&rest args)
-  (uiop:run-program (format nil "~{~a~^ ~}" args) :output :string))
 
 (defun component-present-p (value)
   (and value (not (eql value :unspecific))))

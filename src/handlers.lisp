@@ -8,7 +8,8 @@
                 :write-log)
   (:export :predicate-update
            :log-update
-           :tg-message))
+           :tg-message
+           :shell))
 
 (in-package :makima.handlers)
 
@@ -21,3 +22,6 @@
     (dex:post (format nil tg-api (setting "tg-token") "sendMessage")
               :content `(("chat_id" . ,(setting "tg-user-id"))
                          ("text" . ,(format nil text name content))))))
+
+(defun shell (meta &rest args)
+  (uiop:run-program (format nil "~{~a~^ ~}" args) :output :string))
