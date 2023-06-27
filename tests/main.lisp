@@ -1,7 +1,20 @@
 (defpackage makima/tests/main
   (:use :cl
         :makima
-        :rove))
+        :makima.html-watcher
+        :fiveam)
+  (:export :makima))
+
 (in-package :makima/tests/main)
 
-;; NOTE: To run this test file, execute `(asdf:test-system :makima)' in your Lisp.
+(setf *on-failure* nil)
+(setf *run-test-when-defined* t)
+(setf *run-test-when-defined* nil)
+
+(setup)
+(print 'started)
+
+(def-suite* makima
+  :description "Makima tests")
+
+

@@ -5,7 +5,8 @@
         :makima.heart
         :makima.predicates
         :makima.handlers)
-  (:export :main))
+  (:export :main
+           :setup))
 
 (in-package :makima)
 

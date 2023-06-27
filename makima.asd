@@ -1,7 +1,8 @@
 (defsystem "makima"
   :version "0.1.0"
   :author "Walpurgisnatch"
-  :license "MIT"
+  :license "MIT"  
+  :description "Monitoring system"
   :depends-on ("stepster"
                "pero"
                "local-time"
@@ -17,6 +18,21 @@
                  (:file "handlers")
                  (:file "system-watcher")
                  (:file "html-watcher")
-                 (:file "sentry")                 
+                 (:file "sentry")
                  (:file "makima"))))
-  :description "Monitoring system")
+  :in-order-to ((test-op (test-op "makima/tests"))))
+
+(defsystem "makima/tests"
+  :depends-on ("fiveam"
+               "ningle"
+               "clack"
+               "jonathan"
+               "stepster"
+               "makima")
+  :components ((:module "tests"
+                :components
+                ((:file "main")
+                 (:file "html-watcher" :depends-on ("main" "server"))
+                 (:file "server" :depends-on ("data"))
+                 (:file "data"))))
+  :perform (test-op (o c) (symbol-call :fiveam '#:run! 'makima)))

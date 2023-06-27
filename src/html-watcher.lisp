@@ -3,13 +3,15 @@
   (:use :cl :makima.utils :makima.predicates)
   (:import-from :pero
                 :write-log)
-  (:export :check-for-html-updates))
+  (:export :check-for-html-updates
+           :create-record
+           :reset-table
+           :content-record-content
+           :*content*))
 
 (in-package :makima.html-watcher)
 
 (defparameter *content* (make-hash-table :test 'equalp))
-
-;(setf *content* nil)
 
 ; predicates is a list of strings first elements of which name of predicate
 ; and rest is arguments
@@ -28,17 +30,15 @@
 (defun create-record (name page selector &key content (predicate '(content-updated)) handler once)
   (let* ((content (or content (parse-content page selector))))
     (if (entry-exist name *content*)
-        (content-updated name page selector)
+        (check-record name page selector handler)
         (progn ;(write-log :created name content)
                (sethash name (make-content-record
-                              name page selector 
+                              name page selector
                               :content content
                               :predicate predicate
                               :handler handler
                               :once once)
                         *content*)))))
-
-(print (create-record "jahy-updated" "https://myanimelist.net/profile/Walpurgisnatch" "div.manga:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > span:nth-child(1)"  :handler '((log-update) (tg-message) (shell "touch" "~/makima-handler"))))
 
 (defun check-record (name page selector handler)
   (let* ((content (parse-content page selector))
@@ -47,10 +47,10 @@
          (predicate (content-record-predicate current)))
     (when (apply (predicate-function predicate)
                  (predicate-args last-value content predicate))
+      (handle handler name last-value content)
       (if (content-record-once current)
           (remhash name *content*)
-          (update-record name current content))
-      (handle handler name last-value content))))
+          (update-record name current content)))))
 
 (defun handle (handlers name last content)
   (loop for handler in handlers do
@@ -64,9 +64,12 @@
 (defun check-for-html-updates ()
   (maphash
    #'(lambda (key record)
-       (check-record        
+       (check-record
         key
         (content-record-page record)
         (content-record-selector record)
         (content-record-handler record)))
    *content*))
+
+(defun reset-table ()
+  (setf *content* (make-hash-table :test 'equalp)))
