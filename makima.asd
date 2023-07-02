@@ -7,16 +7,18 @@
                "pero"
                "local-time"
                "usocket"
-               "cl-ppcre")
+               "cl-ppcre"
+               "ironclad")
   :components ((:module "src"
                 :serial t
                 :components
-                ((:file "daemon")                 
+                ((:file "daemon")
                  (:file "utils")
                  (:file "heart")
                  (:file "predicates")
                  (:file "handlers")
                  (:file "system-watcher")
+                 (:file "files-watcher")
                  (:file "html-watcher")
                  (:file "sentry")
                  (:file "makima"))))
@@ -32,6 +34,7 @@
   :components ((:module "tests"
                 :components
                 ((:file "main")
+                 (:file "files-watcher" :depends-on ("main" "server"))
                  (:file "html-watcher" :depends-on ("main" "server"))
                  (:file "server" :depends-on ("data"))
                  (:file "data"))))

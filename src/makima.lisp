@@ -13,7 +13,7 @@
 (defparameter *root-dir* "~/.makima")
 
 (defun setup ()
-  (parse-settings "../.env")
+  (parse-settings ".env")
   (pero:logger-setup "~/makima")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"

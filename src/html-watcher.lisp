@@ -31,7 +31,7 @@
   (let* ((content (or content (parse-content page selector))))
     (if (entry-exist name *content*)
         (check-record name page selector handler)
-        (progn ;(write-log :created name content)
+        (progn (write-log :created name content)
                (sethash name (make-content-record
                               name page selector
                               :content content

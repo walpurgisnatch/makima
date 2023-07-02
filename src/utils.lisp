@@ -76,9 +76,9 @@
 (defun handler-args (name last new handler)
   (concatenate 'list `(,(list name last new)) (cdr handler)))
 
-;; (defun hash-page (page)
-;;   (ironclad:byte-array-to-hex-string
-;;    (ironclad:digest-sequence
-;;     :md5
-;;     (ironclad:ascii-string-to-byte-array page))))
+(defun hash-page (page)
+  (ironclad:byte-array-to-hex-string
+   (ironclad:digest-sequence
+    :md5
+    (ironclad:ascii-string-to-byte-array page))))
 
