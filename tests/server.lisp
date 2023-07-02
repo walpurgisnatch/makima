@@ -3,18 +3,14 @@
 (defpackage makima/tests/server
   (:use :cl)
   (:import-from :makima/tests/data
-                :*pages-data*
                 :*content-data*)
   (:export :start
            :stop
-           :reset-page
-           :reset-content
-           :next-page
-           :next-content))
+           :reset-content-page
+           :next-content-page))
 
 (in-package :makima/tests/server)
 
-(defparameter *pages* *pages-data*)
 (defparameter *content* *content-data*)
 
 (defvar *app* (make-instance 'ningle:<app>))
@@ -48,17 +44,11 @@
              (setf *server* nil))
       (format t "Not running")))
 
-(defun reset-pages ()
-  (setf *pages* *pages-data*)
-  (define-routes))
-(defun reset-content ()
+(defun reset-content-page ()
   (setf *content* *content-data*)
   (define-routes))
 
-(defun next-page ()
-  (setf *pages* (cdr *pages*))
-  (define-routes))
-(defun next-content ()
+(defun next-content-page ()
   (setf *content* (cdr *content*))
   (define-routes))
 
@@ -69,8 +59,6 @@
 (defun define-routes ()
   (handler-bind ((warning #'ignore-warning))
     (setf (ningle:route *app* "/") "Fine")
-
-    (setf (ningle:route *app* "/page") (car *pages*))
 
     (setf (ningle:route *app* "/content") (car *content*))
 
