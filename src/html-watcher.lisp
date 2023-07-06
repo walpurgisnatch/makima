@@ -6,23 +6,25 @@
   (:export :check-for-html-updates
            :create-record
            :reset-table
-           :content-record-content
+           :content
            :*content*))
 
 (in-package :makima.html-watcher)
 
 (defparameter *content* (make-hash-table :test 'equalp))
 
-; predicates is a list of strings first elements of which name of predicate
-; and rest is arguments
-(defstruct (content-record (:constructor make-content-record (name page selector &key content predicate handler once)))
-  name
-  page
-  selector
-  content
-  predicate
-  handler
-  once)
+(defclass content-record ()
+  ((name :initarg :name :accessor name)
+   (page :initarg :page :accessor page)
+   (selector :initarg :selector :accessor selector)
+   (content :initarg :content :accessor content :initform nil)
+   (predicate :initarg :predicate :accessor predicate :initform nil)
+   (handler :initarg :handler :accessor handler :initform nil)
+   (once :initarg :once :accessor once :initform nil)))
+
+(defun make-content-record (name page selector &key content predicate handler once)
+  (make-instance 'content-record :name name :page page :selector selector
+                 :content content :predicate predicate :handler handler :once once))
 
 (defun parse-content (page selector)
   (ss:parse-text page selector))
@@ -40,36 +42,34 @@
                               :once once)
                         *content*)))))
 
-(defun check-record (name page selector handler)
-  (let* ((content (parse-content page selector))
-         (current (gethash name *content*))
-         (last-value (content-record-content current))
-         (predicate (content-record-predicate current)))
-    (when (apply (predicate-function predicate)
-                 (predicate-args last-value content predicate))
-      (handle handler name last-value content)
-      (if (content-record-once current)
-          (remhash name *content*)
-          (update-record name current content)))))
+(defmethod check-record ((record content-record))
+  (with-accessors ((name name) (page page) (selector selector) (handler handler)
+                   (current content) (predicate predicate) (once once))
+      record
+    (let ((content (parse-content page selector)))
+      (when (apply (predicate-function predicate)
+                   (predicate-args current content predicate))
+        (handle handler name current content)
+        (if once
+            (remhash name *content*)
+            (setf current content))))))
 
 (defun handle (handlers name last content)
   (loop for handler in handlers do
     (apply (predicate-function handler)
            (handler-args name last content handler))))
 
-(defun update-record (name current content)
-  (setf (content-record-content current) content)
-  (sethash name current *content*))
-
 (defun check-for-html-updates ()
   (maphash
    #'(lambda (key record)
-       (check-record
-        key
-        (content-record-page record)
-        (content-record-selector record)
-        (content-record-handler record)))
+       (declare (ignorable key))
+       (check-record record))
    *content*))
+
+(defmethod print-object ((obj content-record) stream)
+  (print-unreadable-object (obj stream :type t)
+    (with-accessors ((name name)) obj
+      (format stream "~a" name))))
 
 (defun reset-table ()
   (setf *content* (make-hash-table :test 'equalp)))

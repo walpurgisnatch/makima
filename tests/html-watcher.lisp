@@ -25,11 +25,12 @@
   (let ((result (create-record "jahych-common" "http://localhost:5000/content" "span.text:nth-child(1)" :handler '((shell "touch" "~/makima/stop")))))
     (create-record "jahych-predicate" "http://localhost:5000/content" "span.text:nth-child(1)" :predicate '(more-or-equal-than 44) :handler '((tg-message)))
     (is (not (null result)))
-    (is (equal (content-record-content result) "33"))))
+    (is (equal (content result) "33"))))
 
 (test record-update-test
   (next-content-page)
   (check-for-html-updates)
+  (is (equal (content (gethash "jahych-common" *content*)) "39"))
   (is (probe-file "~/makima/stop")))
 
 (test record-predicate-test

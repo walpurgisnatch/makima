@@ -16,20 +16,10 @@
 (defparameter *content-folder* "~/makima/pages")
 
 (defclass page ()
-  ((name
-    :initarg :name
-    :accessor name)
-   (path
-    :initarg :path
-    :accessor path)
-   (hash
-    :initarg :hash
-    :accessor hash
-    :initform nil)
-   (last-time-changed
-    :initarg :hash
-    :accessor last-time-changed
-    :initform nil)))
+  ((name :initarg :name :accessor name)
+   (path :initarg :path :accessor path)
+   (hash :initarg :hash :accessor hash :initform nil)
+   (last-time-changed :initarg :hash :accessor last-time-changed :initform nil)))
 
 (defun save-page (path name)
   (ss:download-page
@@ -41,16 +31,15 @@
     (setf hash (hash-page (save-page path name)))))
 
 (defun make-page (name path)
-  (let ((page (make-instance 'page :name name :path path)))
-    (parse-page page)
-    page))
+  (make-instance 'page :name name :path path))
 
 (defun create-record (name path)
   (let ((page (make-page name path)))
+    (parse-page page)
     (sethash name page *pages*)))
 
 (defmethod check-record ((page page))
-  (with-accessors ((name name) (path path) (current hash)) page    
+  (with-accessors ((name name) (path path) (current hash)) page
     (let ((hash (hash-page (ss:safe-get path))))
       (unless (equal hash current)
         (save-page path name)

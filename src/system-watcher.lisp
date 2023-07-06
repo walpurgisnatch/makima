@@ -10,18 +10,24 @@
 
 (defparameter *table* (make-hash-table :test 'equalp))
 
-(defstruct (record (:constructor make-record (name file predicate handler)))
-  name
-  file
-  predicate
-  handler)
+(defclass record ()
+  ((name :initarg :name :accessor name)
+   (file :initarg :file :accessor file)
+   (predicate :initarg :predicate :accessor predicate)
+   (handler :initarg :handler :accessor handler)))
+
+(defun make-record (name file predicate handler)
+  (make-instance 'record :name name :file file
+                         :predicate predicate :handler handler))
 
 (defun create-record (name file predicate handler)
   (sethash name (make-record name file predicate handler) *table*))
 
 (create-record "heart stopper" "~/makima/stop" '(probe-file) '(heart-stop))
 
-(defun file-check (name file predicate handler)
+(defmethod file-check ((record record))
+  (with-accessors ((name name) (file file) (predicate predicate) (handler handler))
+      record
   (when (apply (predicate-function predicate) (predicate-args nil file predicate))
     (write-log :file name)
     (apply (predicate-function handler) (cdr handler))))
@@ -29,9 +35,6 @@
 (defun check-system-files ()
   (maphash
    #'(lambda (key record)
-       (file-check
-        key
-        (record-file record)
-        (record-predicate record)
-        (record-handler record)))
+       (declare (ignorable key))
+       (file-check record))
    *table*))
