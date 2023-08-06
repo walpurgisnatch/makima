@@ -30,7 +30,7 @@
       record
   (when (apply (predicate-function predicate) (predicate-args nil file predicate))
     (write-log :file name)
-    (apply (predicate-function handler) (cdr handler))))
+    (apply (predicate-function handler) (cdr handler)))))
 
 (defun check-system-files ()
   (maphash

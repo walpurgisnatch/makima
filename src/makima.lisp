@@ -4,16 +4,28 @@
         :makima.sentry
         :makima.heart
         :makima.predicates
-        :makima.handlers)
+        :makima.handlers
+        :makima.html-watcher
+        :makima.system-watcher)
   (:export :main
            :setup))
 
 (in-package :makima)
 
 (defparameter *root-dir* "~/.makima")
+(defparameter *project-root* nil)
+
+(defun set-root (&optional dir)
+  (handler-case 
+      (let ((curr (or dir (uiop/os:getcwd))))
+        (if (some #'(lambda (x) (search ".git" (namestring x))) (ls curr))
+            (setf *project-root* curr)
+            (set-root (upper-directory curr))))
+    (error () (format t "Cannot find root directory"))))
 
 (defun setup ()
-  (parse-settings "../.env")
+  (set-root "~/cl/makima")
+  (parse-settings (merge-with-dir ".env" *project-root*))
   (pero:logger-setup "~/makima")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"

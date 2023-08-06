@@ -7,6 +7,7 @@
            :create-record
            :reset-table
            :content
+           :name
            :*content*))
 
 (in-package :makima.html-watcher)
@@ -49,15 +50,15 @@
     (let ((content (parse-content page selector)))
       (when (apply (predicate-function predicate)
                    (predicate-args current content predicate))
-        (handle handler name current content)
-        (if once
-            (remhash name *content*)
-            (setf current content))))))
+        (setf current content)
+        (handle handler record)
+        (when once
+            (remhash name *content*))))))
 
-(defun handle (handlers name last content)
+(defun handle (handlers record)
   (loop for handler in handlers do
     (apply (predicate-function handler)
-           (handler-args name last content handler))))
+           (handler-args handler record))))
 
 (defun check-for-html-updates ()
   (maphash

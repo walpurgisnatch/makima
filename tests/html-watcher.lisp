@@ -22,8 +22,8 @@
   (start))
 
 (test create-record-test
-  (let ((result (create-record "jahych-common" "http://localhost:5000/content" "span.text:nth-child(1)" :handler '((shell "touch" "~/makima/stop")))))
-    (create-record "jahych-predicate" "http://localhost:5000/content" "span.text:nth-child(1)" :predicate '(more-or-equal-than 44) :handler '((tg-message)))
+  (let ((result (create-record "jahych-common" "http://localhost:5000/content" "span.text:nth-child(1)" :handler '((tg-message "~{~a was updated with content ~a~}" "makima-name" "makima-content")))))
+    (create-record "jahych-predicate" "http://localhost:5000/content" "span.text:nth-child(1)" :predicate '(more-or-equal-than 44) :handler '((tg-message "~{~a was updated with content ~a~}" "makima-name" "makima-content")))
     (is (not (null result)))
     (is (equal (content result) "33"))))
 
@@ -31,14 +31,16 @@
   (next-content-page)
   (check-for-html-updates)
   (is (equal (content (gethash "jahych-common" *content*)) "39"))
-  (is (probe-file "~/makima/stop")))
+  (is (equal (content (gethash "jahych-predicate" *content*)) "33")))
+
+(check-for-html-updates)
 
 (test record-predicate-test
   (next-content-page)
   (check-for-html-updates)
-  (print "HEH")
   (next-content-page)
-  (check-for-html-updates))
+  (check-for-html-updates)
+  (is (equal (content (gethash "jahych-predicate" *content*)) "44")))
 
 (test reset
   (when (setq stopf (probe-file "~/makima/stop"))
@@ -46,3 +48,5 @@
 
 (defun test-html-watcher ()
   (run! 'html-watcher))
+
+(test-html-watcher)
