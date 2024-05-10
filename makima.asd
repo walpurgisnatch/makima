@@ -17,10 +17,10 @@
                  (:file "heart")
                  (:file "predicates")
                  (:file "handlers")
-                 (:file "system-watcher")
-                 (:file "files-watcher")
-                 (:file "html-watcher")
                  (:file "sentry")
+                 ;(:file "system-watcher")
+                 ;(:file "files-watcher")
+                 ;(:file "html-watcher")                 
                  (:file "makima"))))
   :in-order-to ((test-op (test-op "makima/tests"))))
 
@@ -34,8 +34,8 @@
   :components ((:module "tests"
                 :components
                 ((:file "main")
-                 (:file "files-watcher" :depends-on ("main" "server"))
-                 (:file "html-watcher" :depends-on ("main" "server"))
+                 ;(:file "files-watcher" :depends-on ("main" "server"))
+                 ;(:file "html-watcher" :depends-on ("main" "server"))
                  (:file "server" :depends-on ("data"))
                  (:file "data"))))
   :perform (test-op (o c) (symbol-call :fiveam '#:run! 'makima)))

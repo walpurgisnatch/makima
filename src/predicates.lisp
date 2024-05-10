@@ -12,23 +12,26 @@
 
 (in-package :makima.predicates)
 
+(defmacro defpred (name args &body body)
+  `(defun ,name ,(cons 'last 'current args) ,@body))
+
 (defmacro string-as-float-comparsion (fun &rest args)
   `(,fun ,@(loop for arg in args collect `(parse-float ,arg))))
 
-(defun content-updated (last new)
-  (not (equal last new)))
+(defpred content-updated ()
+  (not (equal last current)))
 
-(defun in-content (_ content regex)
-  (cl-ppcre:scan-to-strings regex content))
+(defpred in-current (regex)
+  (cl-ppcre:scan-to-strings regex current))
 
-(defun more-than (_ content arg)
-  (string-as-float-comparsion > content arg))
+(defpred more-than (arg)
+  (string-as-float-comparsion > current arg))
 
-(defun more-or-equal-than (_ content arg)
-  (string-as-float-comparsion >= content arg))
+(defpred more-or-equal-than (arg)
+  (string-as-float-comparsion >= current arg))
 
-(defun less-than (_ content arg)
-  (string-as-float-comparsion < content arg))
+(defpred less-than (arg)
+  (string-as-float-comparsion < current arg))
 
-(defun less-or-equal-than (_ content arg)
-  (string-as-float-comparsion <= content arg))
+(defpred less-or-equal-than (arg)
+  (string-as-float-comparsion <= current arg))
