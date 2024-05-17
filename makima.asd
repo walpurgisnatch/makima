@@ -1,9 +1,10 @@
 (defsystem "makima"
-  :version "0.1.0"
+  :version "0.1.2"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
   :depends-on ("stepster"
+               "alexandria"
                "pero"
                "local-time"
                "usocket"
@@ -13,6 +14,7 @@
                 :serial t
                 :components
                 ((:file "daemon")
+                 (:file "file-works")
                  (:file "utils")
                  (:file "heart")
                  (:file "predicates")
@@ -29,11 +31,14 @@
                "ningle"
                "clack"
                "jonathan"
+               "pero"
+               "alexandria"
                "stepster"
                "makima")
   :components ((:module "tests"
                 :components
                 ((:file "main")
+                 (:file "sentry" :depends-on ("main"))
                  ;(:file "files-watcher" :depends-on ("main" "server"))
                  ;(:file "html-watcher" :depends-on ("main" "server"))
                  (:file "server" :depends-on ("data"))

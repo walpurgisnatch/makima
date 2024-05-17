@@ -6,8 +6,8 @@
                 :tg-api)
   (:import-from :pero
                 :write-log)
-  (:export :predicate-update
-           :log-update
+  (:export :log-update
+           :write-line-to
            :tg-message
            :shell))
 
@@ -15,6 +15,10 @@
 
 (defun log-update (name content)
     (write-log :changes name content))
+
+(defun write-line-to (file line)
+   (with-open-file (stream file :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (write-line (or line "nil") stream)))
 
 (defun tg-message (format &rest args)
   (dex:post (format nil tg-api (setting "tg-token") "sendMessage")

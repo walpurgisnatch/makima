@@ -4,9 +4,7 @@
         :makima.sentry
         :makima.heart
         :makima.predicates
-        :makima.handlers
-        :makima.html-watcher
-        :makima.system-watcher)
+        :makima.handlers)
   (:export :main
            :setup))
 

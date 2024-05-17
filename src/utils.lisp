@@ -7,8 +7,8 @@
            :make-hash
            :parse-float
            :makima-function
-           :makima-var
-           :makima-varp))
+           :watcher-var
+           :watcher-varp))
 
 (in-package :makima.utils)
 
@@ -44,12 +44,15 @@
         (loop for number = (read stream nil nil)
               while (and number (numberp number)) collect number)))))
 
-(defun makima-function (list)
-  (symbol-function (intern (string-upcase (car list)) 'makima)))
+(defun makima-function (str)
+  (symbol-function (intern (string-upcase str) 'makima)))
 
-(defun makima-var (var)
-  "Cut off makima- part"
-  (makima-function (subseq var 7)))
+(defun watcher-var (var)
+  "Cut off watcher- part"
+  (makima-function (subseq var 8)))
 
-(defun makima-varp (string)
-  (string-starts-with string "makima-"))
+(defun watcher-varp (string)
+  (when (stringp string)
+      (string-starts-with string "watcher-")))
+
+
