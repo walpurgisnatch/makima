@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.1.3"
+  :version "0.1.5"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -11,20 +11,16 @@
                "cl-ppcre"
                "ironclad")
   :components ((:module "src"
-                :serial t
                 :components
                 ((:file "daemon")
                  (:file "file-works")
-                 (:file "utils")
-                 (:file "shared")
-                 (:file "heart")
-                 (:file "predicates")
-                 (:file "handlers")
-                 (:file "sentry")
-                 ;(:file "system-watcher")
-                 ;(:file "files-watcher")
-                 ;(:file "html-watcher")                 
-                 (:file "makima"))))
+                 (:file "utils" :depends-on ("file-works"))
+                 (:file "shared" :depends-on ("utils"))
+                 (:file "predicates" :depends-on ("shared"))
+                 (:file "handlers" :depends-on ("shared"))
+                 (:file "sentry" :depends-on ("predicates" "handlers"))
+                 (:file "heart" :depends-on ("sentry"))
+                 (:file "makima" :depends-on ("heart" "daemon")))))
   :in-order-to ((test-op (test-op "makima/tests"))))
 
 (defsystem "makima/tests"
@@ -40,8 +36,6 @@
                 :components
                 ((:file "main")
                  (:file "sentry" :depends-on ("main"))
-                 ;(:file "files-watcher" :depends-on ("main" "server"))
-                 ;(:file "html-watcher" :depends-on ("main" "server"))
                  (:file "server" :depends-on ("data"))
                  (:file "data"))))
   :perform (test-op (o c) (symbol-call :fiveam '#:run! 'makima)))
