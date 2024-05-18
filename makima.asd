@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.1.2"
+  :version "0.1.3"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -16,6 +16,7 @@
                 ((:file "daemon")
                  (:file "file-works")
                  (:file "utils")
+                 (:file "shared")
                  (:file "heart")
                  (:file "predicates")
                  (:file "handlers")

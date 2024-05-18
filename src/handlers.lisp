@@ -1,7 +1,6 @@
-(in-package :cl-user)
 (defpackage makima.handlers
   (:use :cl :makima.utils)
-  (:import-from :makima.heart
+  (:import-from :makima.shared
                 :setting
                 :tg-api)
   (:import-from :pero

@@ -1,4 +1,3 @@
-(in-package :cl-user)
 (defpackage makima.predicates
   (:use :cl :makima.utils)
   (:import-from :pero
