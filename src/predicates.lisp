@@ -1,4 +1,3 @@
-(in-package :cl-user)
 (defpackage makima.predicates
   (:use :cl :makima.utils)
   (:import-from :pero
@@ -18,17 +17,17 @@
 (defun content-updated (last new)
   (not (equal last new)))
 
-(defun in-content (_ content regex)
+(defun in-content (content regex)
   (cl-ppcre:scan-to-strings regex content))
 
-(defun more-than (_ content arg)
+(defun more-than (content arg)
   (string-as-float-comparsion > content arg))
 
-(defun more-or-equal-than (_ content arg)
+(defun more-or-equal-than (content arg)
   (string-as-float-comparsion >= content arg))
 
-(defun less-than (_ content arg)
+(defun less-than (content arg)
   (string-as-float-comparsion < content arg))
 
-(defun less-or-equal-than (_ content arg)
+(defun less-or-equal-than (content arg)
   (string-as-float-comparsion <= content arg))
