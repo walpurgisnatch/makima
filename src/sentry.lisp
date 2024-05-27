@@ -3,11 +3,14 @@
   (:use :cl :makima.utils :makima.predicates)
   (:import-from :pero
                 :write-log)
-  (:export *watchers*
+  (:export :*watchers*
+           :watcher
            :name
            :target
            :handlers
            :records
+           :current-value
+           :timestamp
            :predicate
            :actions
            :recordp
@@ -25,9 +28,9 @@
            :fcall
            :handle
            :make-watcher
-           :current-value
            :parse-target
            :report
+           :interval-passed
            :create-watcher
            :clear-watchers))
 
@@ -42,11 +45,12 @@
    (interval  :initarg :interval  :accessor interval :initform 60)
    (handlers  :initarg :handlers  :accessor handlers)
    (records   :initarg :records   :reader   records :initform nil)
-   (current   :initarg :current   :accessor current-value :initform nil)))
+   (current   :initarg :current   :accessor current-value :initform nil)
+   (timestamp :initarg :timestamp :accessor timestamp :initform nil)))
 
 (defclass handler ()
   ((predicate :initarg :predicate :accessor predicate :initform #'content-updated)
-   (actions   :initarg :actions   :accessor actions)
+   (actions   :initarg :actions   :accessor actions :initform nil)
    (recordp   :initarg :recordp   :accessor recordp :initform nil)
    (once      :initarg :once      :accessor once :initform nil)))
 
@@ -145,18 +149,25 @@
       (run-actions actions watcher)
       recordp)))
 
+(defgeneric report (watcher)
+  (:documentation "Parse target, update timestamp and run all handlers"))
+
 (defmethod report ((watcher watcher))
-  (with-accessors ((handlers handlers)) watcher
+  (with-accessors ((handlers handlers) (timestamp timestamp)) watcher
     (parse-target watcher)
+    (setf timestamp (get-universal-time))
     (loop for handler in handlers
           with savep = t
           when (handle handler watcher savep)
             do (setf savep nil))))
 
-(defun create-watcher (&key name target parser interval handlers)
-  (sethash name (make-watcher :name name :target target :parser parser
-                              :interval interval :handlers handlers)
-           *watchers*))
+(defmethod interval-passed (current (watcher watcher))
+  (with-accessors ((last timestamp) (interval interval)) watcher
+    (or (null last) (>= (- current last) interval))))
+
+(defmethod create-watcher ((watcher watcher))
+  (with-accessors ((name name)) watcher
+    (sethash name watcher *watchers*)))
 
 (defun clear-watchers ()
   (setf *watchers* (make-hash-table :test 'equalp)))

@@ -11,7 +11,6 @@
 
 (in-package :makima)
 
-
 (defun setup ()
   (parse-settings *vars-file*)
   (pero:logger-setup "~/makima-logs")
@@ -29,9 +28,7 @@
 (defun main (&optional (sleep-time 1))
   ;(makima.daemon:daemonize :exit-parent t)
   (setup)
-  (pero:write-log :log "Heartbeat started")
   (loop while *heartbeat* do
     (beat))
-  (pero:write-log :log "Heartbeat stoped")
   ;(makima.daemon:exit)
   )

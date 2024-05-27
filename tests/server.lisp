@@ -6,6 +6,7 @@
                 :*content-data*)
   (:export :start
            :stop
+           :define-routes
            :reset-content-page
            :next-content-page))
 

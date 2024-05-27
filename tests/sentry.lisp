@@ -28,7 +28,6 @@
 (defparameter test-watcher nil)
 
 (test init
-  (setf counter 0)
   (set '*test-var* "100")
   (write-line-to "~/.makima-out")
   (setf test-watcher
@@ -82,6 +81,7 @@
                     (make-handler :recordp t :actions '((write-line-to "~/.makima-out" "watcher-last-record-value"))))))
   (set '*test-var* "123")
   (report test-watcher)
+  (is (<= (- (get-universal-time) (timestamp test-watcher)) 3))
   (is (= 1 (length (records test-watcher))))
   (is (string= "123" (last-record-value test-watcher)))
   (is (out-content "123")))
