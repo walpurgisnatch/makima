@@ -1,5 +1,6 @@
 (defpackage makima/tests/html-watcher
   (:use :cl
+        :makima
         :makima.sentry
         :makima.html-watcher
         :makima/tests/server
@@ -20,11 +21,13 @@
          :target ".link"
          :parser #'ss:parse-text
          :handlers (list
-                    (make-handler :recordp t :once t))))
+                    (make-handler :recordp t
+                                  :actions '((tg-message "current value - ~a" "watcher-current-value"))))))
 
 (defparameter *test-watcher* *init-watcher*)
 
 (test init
+  (setup)
   (define-routes)
   (reset-content-page)
   (setf *test-watcher* *init-watcher*)

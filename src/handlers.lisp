@@ -1,8 +1,7 @@
 (defpackage makima.handlers
   (:use :cl :makima.utils)
   (:import-from :makima.shared
-                :setting
-                :tg-api)
+                :setting)
   (:import-from :pero
                 :write-log)
   (:export :log-update
@@ -20,9 +19,9 @@
     (write-line (or line "nil") stream)))
 
 (defun tg-message (format &rest args)
-  (dex:post (format nil tg-api (setting "tg-token") "sendMessage")
+  (dex:post (format nil (setting "tg-api") (setting "tg-token") "sendMessage")
             :content `(("chat_id" . ,(setting "tg-user-id"))
-                       ("text" . ,(format nil format args)))))
+                       ("text" . ,(apply #'format nil format args)))))
 
 (defun shell (&rest args)
   (uiop:run-program (format nil "~{~a~^ ~}" args) :output :string))

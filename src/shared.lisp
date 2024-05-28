@@ -1,5 +1,5 @@
 (defpackage makima.shared
-  (:use :cl :makima.utils)
+  (:use :cl :makima.utils :makima.file-works)
   (:export :setting
            :parse-settings
            :*vars-file*
@@ -7,10 +7,11 @@
 
 (in-package :makima.shared)
 
-(defparameter *vars-file* "~/.config/makima/makima")
-(defparameter *settings* nil)
+(defparameter *root-folder* "~/.makima")
+(defparameter *vars-file* (merge-with-dir "makima.conf" *root-folder*))
+(defparameter *data-folder* (merge-with-dir "data/" *root-folder*))
 
-(defparameter tg-api "https://api.telegram.org/bot~a/~a")
+(defparameter *settings* nil)
 
 (defun parse-settings (file)
   (let ((settings (make-hash-table :test #'equalp)))
