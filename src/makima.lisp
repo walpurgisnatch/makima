@@ -13,6 +13,7 @@
 
 (defun setup ()
   (parse-settings *vars-file*)
+  (postmodern:connect-toplevel "makima" "makima" "makima" "localhost")
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"

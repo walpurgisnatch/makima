@@ -16,7 +16,7 @@
 
 (defparameter *init-watcher*
   (create-html-watcher
-         :name "test"
+         :name "html-test"
          :page "localhost:5000/content"
          :target ".link"
          :parser #'ss:parse-text

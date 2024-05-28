@@ -1,6 +1,6 @@
 (in-package :cl-user)
 (defpackage makima.sentry
-  (:use :cl :makima.utils :makima.predicates)
+  (:use :cl :postmodern :makima.utils :makima.predicates)
   (:import-from :pero
                 :write-log)
   (:export :*watchers*
@@ -44,7 +44,6 @@
    (parser    :initarg :parser    :accessor parser)
    (interval  :initarg :interval  :accessor interval :initform 60)
    (handlers  :initarg :handlers  :accessor handlers)
-   (records   :initarg :records   :reader   records :initform nil)
    (current   :initarg :current   :accessor current-value :initform nil)
    (timestamp :initarg :timestamp :accessor timestamp :initform nil)))
 
@@ -56,53 +55,61 @@
 
 ;; all data associated with stored records
 (defclass record ()
-  ((id        :initarg :id        :reader id)
-   (value     :initarg :value     :reader value)
-   (previous  :initarg :previous  :reader previous)
-   (timestamp :initarg :timestamp :reader timestamp)))
+  ((id        :col-type integer :initarg :id        :reader id) 
+   (value     :col-type string  :initarg :value     :reader value)
+   (timestamp :col-type string  :initarg :timestamp :reader timestamp)
+   (watcher   :col-type string  :initarg :watcher   :reader watcher))
+  (:metaclass dao-class)
+  (:keys watcher id)
+  (:table-name records))
 
 (defmethod print-object ((obj watcher) stream)
   (print-unreadable-object (obj stream :type t)
     (with-accessors ((name name) (value current-value) (records records)) obj
       (format stream "~a: ~a | ~a " name value (length records)))))
 
-(defmethod print-object ((obj record) stream)
-  (print-unreadable-object (obj stream :type t)
-    (with-accessors ((id id) (value value) (timestamp timestamp)) obj
-      (format stream "~a ~a ~a" id value timestamp))))
-
 (defmethod print-object ((obj handler) stream)
   (print-unreadable-object (obj stream :type t)
     (with-accessors ((predicate predicate) (recordp recordp)) obj
       (format stream "~a ~a" recordp predicate))))
 
+(defmethod print-object ((obj record) stream)
+  (print-unreadable-object (obj stream :type t)
+    (with-accessors ((id id) (watcher watcher) (value value)) obj
+      (format stream "~a: ~a | ~a" id watcher value))))
+
 ;; records utils
-(defmethod make-record ((watcher watcher))
+(defmethod save-record ((watcher watcher))
   (let ((last (last-record watcher))
-        (value (current-value watcher)))
+        (watcher-name (name watcher))
+        (value (current-value watcher)))1
     (if last
-        (make-instance 'record :id (1+ (id last)) :value value
-                               :previous (value last) :timestamp (get-universal-time))
-        (make-instance 'record :id 0 :value value :previous nil
-                               :timestamp (get-universal-time)))))
+        (make-dao 'record :id (1+ (id last)) :value value :watcher watcher-name
+                          :timestamp (get-universal-time))
+        (make-dao 'record :id 0 :value value :watcher watcher-name
+                          :timestamp (get-universal-time)))))
+
+(defmethod records ((watcher watcher))
+  (with-accessors ((watcher-name name)) watcher
+    (select-dao 'record (:= 'watcher watcher-name))))
 
 (defmethod get-record ((watcher watcher) index)
-  (let ((records (records watcher)))
-    (elt records (- (length records) index 1))))
+  (with-accessors ((watcher-name name)) watcher
+    (get-dao 'record watcher-name index)))
 
 (defmethod last-record ((watcher watcher))
-  (car (records watcher)))
+  (with-accessors ((watcher-name name)) watcher
+    (car (query-dao 'record
+                    (:limit
+                     (:order-by
+                      (:select '* :from 'records
+                       :where (:= 'watcher watcher-name))
+                      (:desc 'id))
+                     1)))))
 
 (defmethod last-record-value ((watcher watcher))
   (let ((last (last-record watcher)))
     (when last (value (last-record watcher)))))
-
-(defmethod push-record ((record record) (watcher watcher))
-  (with-slots (records) watcher
-    (push record records)))
-
-(defmethod save-record ((watcher watcher))
-  (push-record (make-record watcher) watcher))
 
 ;; handler utils
 (defmethod make-handler (&key predicate actions recordp once)

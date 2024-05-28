@@ -1,12 +1,13 @@
 (defpackage makima/tests/sentry
   (:use :cl
+        :makima
         :makima.utils
         :makima.sentry
         :makima.predicates
         :makima.handlers
         :makima/tests/main
         :fiveam)
-  (:export :test-sentry))
+  (:export :sentry))
 
 (in-package :makima/tests/sentry)
 
@@ -24,10 +25,12 @@
    (with-open-file (stream file :direction :output :if-exists :supersede :if-does-not-exist :create)
     (write-line (or line "nil") stream)))
 
+(defparameter counter 0)
 (defparameter *test-var* "100")
 (defparameter test-watcher nil)
 
 (test init
+  (setf counter 0)
   (set '*test-var* "100")
   (write-line-to "~/.makima-out")
   (setf test-watcher
@@ -72,7 +75,7 @@
 (test report-test
   (setf test-watcher
         (make-watcher
-         :name "test"
+         :name "test2"
          :target '*test-var*
          :parser #'symbol-value
          :handlers (list

@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.2.1"
+  :version "0.2.2"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -9,7 +9,8 @@
                "local-time"
                "usocket"
                "cl-ppcre"
-               "ironclad")
+               "ironclad"
+               "postmodern")
   :components ((:module "src"
                 :components
                 ((:file "daemon")
@@ -29,8 +30,6 @@
                "ningle"
                "clack"
                "jonathan"
-               "pero"
-               "alexandria"
                "stepster"
                "makima")
   :components ((:module "tests"
