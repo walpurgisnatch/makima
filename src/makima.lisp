@@ -6,14 +6,27 @@
         :makima.sentry
         :makima.predicates
         :makima.handlers)
+  (:import-from :postmodern
+                :execute
+                :query
+                :dao-table-definition)
   (:export :main
-           :setup))
+           :setup
+           :records-tablep
+           :create-records-table))
 
 (in-package :makima)
 
+(defun records-tablep ()
+  (caar (query "select exists (select from information_schema.tables where table_name = 'records');")))
+
+(defun create-records-table ()
+  (unless (records-tablep)
+    (execute (dao-table-definition 'record))))
+
 (defun setup ()
   (parse-settings *vars-file*)
-  (postmodern:connect-toplevel "makima" "makima" "makima" "localhost")
+;  (postmodern:connect-toplevel "makima" "makima" "makima" "localhost")
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"

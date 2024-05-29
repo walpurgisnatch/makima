@@ -6,6 +6,8 @@
         :makima/tests/server
         :makima/tests/main
         :fiveam)
+  (:import-from :postmodern
+                :with-connection)
   (:export :html-watcher))
 
 (in-package :makima/tests/html-watcher)
@@ -14,8 +16,14 @@
   :in makima
   :description "HTML watcher tests")
 
-(defparameter *init-watcher*
-  (create-html-watcher
+(defparameter *test-watcher* nil)
+
+(test init
+  (setup)
+  (define-routes)
+  (reset-content-page)
+  (setf *test-watcher*
+        (create-html-watcher
          :name "html-test"
          :page "localhost:5000/content"
          :target ".link"
@@ -23,21 +31,14 @@
          :handlers (list
                     (make-handler :recordp t
                                   :actions '((tg-message "current value - ~a" "watcher-current-value"))))))
-
-(defparameter *test-watcher* *init-watcher*)
-
-(test init
-  (setup)
-  (define-routes)
-  (reset-content-page)
-  (setf *test-watcher* *init-watcher*)
   (start)
   (sleep 2))
 
 (test html-watcher-test
-  (is (null (records *test-watcher*)))
-  (is (null (current-value *test-watcher*)))
-  (report *test-watcher*)
-  (is (= 1 (length (records *test-watcher*))))
-  (is (string= "10" (current-value *test-watcher*)))
-  (is (string= "10" (last-record-value *test-watcher*))))
+  (with-connection '("makimatest" "makima" "makima" "localhost")
+    (is (null (records *test-watcher*)))
+    (is (null (current-value *test-watcher*)))
+    (report *test-watcher*)
+    (is (= 1 (length (records *test-watcher*))))
+    (is (string= "10" (current-value *test-watcher*)))
+    (is (string= "10" (last-record-value *test-watcher*)))))

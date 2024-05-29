@@ -5,6 +5,7 @@
                 :write-log)
   (:export :*watchers*
            :watcher
+           :record
            :name
            :target
            :handlers
@@ -55,10 +56,10 @@
 
 ;; all data associated with stored records
 (defclass record ()
-  ((id        :col-type integer :initarg :id        :reader id) 
+  ((id        :col-type integer :initarg :id        :reader id)   
+   (watcher   :col-type string  :initarg :watcher   :reader watcher)
    (value     :col-type string  :initarg :value     :reader value)
-   (timestamp :col-type string  :initarg :timestamp :reader timestamp)
-   (watcher   :col-type string  :initarg :watcher   :reader watcher))
+   (timestamp :col-type string  :initarg :timestamp :reader timestamp))
   (:metaclass dao-class)
   (:keys watcher id)
   (:table-name records))

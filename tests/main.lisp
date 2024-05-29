@@ -2,7 +2,11 @@
   (:use :cl
         :makima
         :fiveam)
-  (:export :makima))
+  (:import-from :postmodern
+                :with-connection
+                :query)
+  (:export :makima
+           :clear-records))
 
 (in-package :makima/tests/main)
 
@@ -10,10 +14,15 @@
 (setf *on-error* :debug)
 (setf *run-test-when-defined* nil)
 
-;(setup)
-(print 'started)
-
 (def-suite* makima
   :description "Makima tests")
+
+(defun clear-records ()
+  (query "delete from records"))
+
+(test init
+  (with-connection '("makimatest" "makima" "makima" "localhost")
+    (create-records-table)
+    (clear-records)))
 
 
