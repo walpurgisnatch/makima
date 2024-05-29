@@ -83,7 +83,7 @@
 (defmethod save-record ((watcher watcher))
   (let ((last (last-record watcher))
         (watcher-name (name watcher))
-        (value (current-value watcher)))1
+        (value (current-value watcher)))
     (if last
         (make-dao 'record :id (1+ (id last)) :value value :watcher watcher-name
                           :timestamp (get-universal-time))
@@ -173,8 +173,9 @@
   (with-accessors ((last timestamp) (interval interval)) watcher
     (or (null last) (>= (- current last) interval))))
 
-(defmethod create-watcher ((watcher watcher))
-  (with-accessors ((name name)) watcher
+(defmethod create-watcher (&key name target parser interval handlers)
+  (let ((watcher (make-watcher :name name :target target :parser parser
+                               :interval interval :handlers handlers)))    
     (sethash name watcher *watchers*)))
 
 (defun clear-watchers ()

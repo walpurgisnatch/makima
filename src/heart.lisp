@@ -17,6 +17,7 @@
 
 (defun beat ()
   (let ((time (get-universal-time)))
-    (loop for watcher in *watchers*
-          if (interval-passed time watcher)
-            do (report watcher))))
+    (maphash #'(lambda (name watcher) (declare (ignorable key))
+                 if (interval-passed time watcher)
+                 do (report watcher))
+             *watchers*)))

@@ -1,10 +1,13 @@
 (defpackage makima/tests/main
   (:use :cl
         :makima
+        :makima.sentry
         :fiveam)
   (:import-from :postmodern
                 :with-connection
                 :query)
+  (:import-from :makima.heart
+                :beat)
   (:export :makima
            :clear-records))
 
@@ -20,9 +23,20 @@
 (defun clear-records ()
   (query "delete from records"))
 
+(defparameter *test-var* "100")
+
 (test init
   (with-connection '("makimatest" "makima" "makima" "localhost")
     (create-records-table)
     (clear-records)))
 
-
+(test heartbeat
+  (let ((watcher (create-watcher
+                  :name "beat-test"
+                  :target '*test-var*
+                  :parser #'symbol-value
+                  :handlers (list
+                             (make-handler :recordp t)))))
+    (with-connection '("makimatest" "makima" "makima" "localhost")
+      (beat)
+      (is (string= "100" (last-record-value watcher))))))

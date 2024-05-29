@@ -26,7 +26,8 @@
 
 (defun setup ()
   (parse-settings *vars-file*)
-;  (postmodern:connect-toplevel "makima" "makima" "makima" "localhost")
+  (with-connection '("makima" "makima" "makima" "localhost")
+    (create-records-table))
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"
@@ -40,9 +41,10 @@
   (pero:create-template "pages" '(:updated "~a | Was updated")))
 
 (defun main (&optional (sleep-time 1))
-  ;(makima.daemon:daemonize :exit-parent t)
+  ;; (makima.daemon:daemonize :exit-parent t)
   (setup)
   (loop while *heartbeat* do
-    (beat))
-  ;(makima.daemon:exit)
+    (with-connection '("makima" "makima" "makima" "localhost")
+      (beat)))
+  ;; (makima.daemon:exit)
   )
