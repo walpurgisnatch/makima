@@ -10,7 +10,10 @@
                "usocket"
                "cl-ppcre"
                "ironclad"
-               "postmodern")
+               "postmodern"
+               "clack"
+               "ningle"
+               "jonathan")
   :components ((:module "src"
                 :components
                 ((:file "daemon")

@@ -33,6 +33,7 @@
            :report
            :interval-passed
            :create-watcher
+           :get-watcher
            :clear-watchers))
 
 (in-package :makima.sentry)
@@ -177,6 +178,9 @@
   (let ((watcher (make-watcher :name name :target target :parser parser
                                :interval interval :handlers handlers)))    
     (sethash name watcher *watchers*)))
+
+(defun get-watcher (watcher)
+  (gethash watcher *watchers*))
 
 (defun clear-watchers ()
   (setf *watchers* (make-hash-table :test 'equalp)))
