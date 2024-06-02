@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.2.4"
+  :version "0.2.5"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -17,12 +17,14 @@
   :components ((:module "src"
                 :components
                 ((:file "daemon")
-                 (:file "file-works")
-                 (:file "utils" :depends-on ("file-works"))
+                 (:file "utils")
+                 (:file "file-utils" :depends-on ("utils"))
+                 (:file "db-utils" :depends-on ("utils"))
                  (:file "shared" :depends-on ("utils"))
                  (:file "predicates" :depends-on ("shared"))
                  (:file "handlers" :depends-on ("shared"))
                  (:file "sentry" :depends-on ("predicates" "handlers"))
+                 (:file "sentry-dao" :depends-on ("sentry"))
                  (:file "html-watcher" :depends-on ("sentry"))
                  (:file "heart" :depends-on ("sentry"))
                  (:file "makima" :depends-on ("heart" "daemon")))))

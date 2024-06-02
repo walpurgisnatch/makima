@@ -1,6 +1,7 @@
 (in-package :cl-user)
 (defpackage makima.html-watcher
   (:use :cl
+        :postmodern
         :makima.utils
         :makima.predicates
         :makima.sentry)
@@ -9,7 +10,8 @@
 (in-package :makima.html-watcher)
 
 (defclass html-watcher (watcher)
-  ((page :initarg :page :accessor page)))
+  ((page :initarg :page :accessor page))
+  (:metaclass dao-class))
 
 (defmethod print-object ((obj html-watcher) stream)
   (print-unreadable-object (obj stream :type t)
@@ -17,7 +19,7 @@
       (format stream "~a: ~a | ~a" name value (length records)))))
 
 (defun create-html-watcher (&key name target parser interval handlers page)
-  (create-watcher
+  (save-watcher
    (make-instance 'html-watcher :name name :target target :parser parser
                                 :interval interval :handlers handlers :page page)))
 

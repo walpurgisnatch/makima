@@ -1,6 +1,7 @@
 (defpackage makima/tests/main
   (:use :cl
         :makima
+        :makima.utils
         :makima.sentry
         :fiveam)
   (:import-from :postmodern
@@ -27,7 +28,7 @@
 
 (test init
   (with-connection '("makimatest" "makima" "makima" "localhost")
-    (create-records-table)
+    (create-table 'record)
     (clear-records)))
 
 (test heartbeat

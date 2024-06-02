@@ -1,5 +1,5 @@
 (defpackage makima.shared
-  (:use :cl :makima.utils :makima.file-works)
+  (:use :cl :makima.utils)
   (:export :setting
            :parse-settings
            :*vars-file*

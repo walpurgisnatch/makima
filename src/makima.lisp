@@ -17,17 +17,11 @@
 
 (in-package :makima)
 
-(defun records-tablep ()
-  (caar (query "select exists (select from information_schema.tables where table_name = 'records');")))
-
-(defun create-records-table ()
-  (unless (records-tablep)
-    (execute (dao-table-definition 'record))))
+;(setup)
 
 (defun setup ()
   (parse-settings *vars-file*)
-  (with-connection '("makima" "makima" "makima" "localhost")
-    (create-records-table))
+  (ensure-tables-exists '(watcher handler predicate action record))
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"

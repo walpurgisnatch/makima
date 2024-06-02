@@ -5,7 +5,11 @@
                 :write-log)
   (:export :*watchers*
            :watcher
+           :handler
+           :predicate
+           :action
            :record
+           
            :name
            :target
            :handlers
@@ -33,6 +37,7 @@
            :report
            :interval-passed
            :create-watcher
+           :save-watcher
            :get-watcher
            :clear-watchers))
 
@@ -41,21 +46,34 @@
 (defparameter *watchers* (make-hash-table :test 'equalp))
 
 (defclass watcher ()
-  ((name      :initarg :name      :accessor name)
-   (target    :initarg :target    :accessor target)
-   (parser    :initarg :parser    :accessor parser)
-   (interval  :initarg :interval  :accessor interval :initform 60)
-   (handlers  :initarg :handlers  :accessor handlers)
-   (current   :initarg :current   :accessor current-value :initform nil)
-   (timestamp :initarg :timestamp :accessor timestamp :initform nil)))
+  ((name      :col-type string    :col-unique t
+                                  :initarg :name      :accessor name)
+   (target    :col-type string    :initarg :target    :accessor target)
+   (parser    :col-type string    :initarg :parser    :accessor parser)
+   (interval  :col-type integer   :initarg :interval  :accessor interval :initform 60)
+   (handlers  :col-type integer[] :initarg :handlers  :accessor handlers)
+   (current   :col-type (or string db-null) :initform nil
+                                  :initarg :current   :accessor current-value )
+   (timestamp :col-type (or string db-null) :initform nil
+                                  :initarg :timestamp :accessor timestamp ))
+  (:metaclass dao-class)
+  (:keys name)
+  (:table-name watchers))
 
 (defclass handler ()
-  ((predicate :initarg :predicate :accessor predicate :initform #'content-updated)
-   (actions   :initarg :actions   :accessor actions :initform nil)
-   (recordp   :initarg :recordp   :accessor recordp :initform nil)
-   (once      :initarg :once      :accessor once :initform nil)))
+  ((id        :col-type integer   :col-identity t     :reader id          :initform nil)
+   (name      :col-type (or string db-null)
+                                  :initarg :name      :accessor name      :initform nil)
+   (predicate :col-type integer   :initarg :predicate :accessor predicate :initform nil)
+   (actions   :col-type integer[] :initarg :actions   :accessor actions   :initform nil)
+   (recordp   :col-type boolean   :initarg :recordp   :accessor recordp   :initform nil)
+   (once      :col-type boolean   :initarg :once      :accessor once      :initform nil)
+   (persist   :col-type boolean   :initarg :persist   :accessor persist   :initform nil))
+  (:metaclass dao-class)
+  (:keys id)
+  (:table-name handlers))
 
-;; all data associated with stored records
+;;; all data associated with stored records
 (defclass record ()
   ((id        :col-type integer :initarg :id        :reader id)   
    (watcher   :col-type string  :initarg :watcher   :reader watcher)
@@ -80,7 +98,7 @@
     (with-accessors ((id id) (watcher watcher) (value value)) obj
       (format stream "~a: ~a | ~a" id watcher value))))
 
-;; records utils
+;;; records
 (defmethod save-record ((watcher watcher))
   (let ((last (last-record watcher))
         (watcher-name (name watcher))
@@ -113,7 +131,7 @@
   (let ((last (last-record watcher)))
     (when last (value (last-record watcher)))))
 
-;; handler utils
+;;; handlers
 (defmethod make-handler (&key predicate actions recordp once)
   (make-instance 'handler :predicate predicate :actions actions
                           :recordp recordp :once once))
@@ -132,11 +150,16 @@
 (defmethod parse-args (list (watcher watcher))
   (map 'list #'(lambda (arg) (parse-arg arg watcher)) list))
 
-(defmethod fcall (func (watcher watcher))
-  (apply (makima-function (car func)) (parse-args (cdr func) watcher)))
+;; (defmethod fcall ((func common-functions) (watcher watcher))
+;;   (apply (makima-function (func-name func))
+;;          (parse-args (func-args func) watcher)))
 
-;; main
-(defun make-watcher (&key name target parser interval handlers)
+(defmethod fcall (func (watcher watcher))
+  (apply (makima-function (car func))
+         (parse-args (cdr func) watcher)))
+
+;;; main
+(defun make-watcher (&key name target parser (interval 60) handlers)
   (make-instance 'watcher :name name :target target :parser parser
                           :interval interval :handlers handlers))
 
@@ -162,7 +185,7 @@
   (:documentation "Parse target, update timestamp and run all handlers"))
 
 (defmethod report ((watcher watcher))
-  (with-accessors ((handlers handlers) (timestamp timestamp)) watcher
+  (with-accessors ((handlers handlers) (timestamp timestamp)) watcher    
     (parse-target watcher)
     (setf timestamp (get-universal-time))
     (loop for handler in handlers
@@ -175,9 +198,11 @@
     (or (null last) (>= (- current last) interval))))
 
 (defmethod create-watcher (&key name target parser interval handlers)
-  (let ((watcher (make-watcher :name name :target target :parser parser
-                               :interval interval :handlers handlers)))    
-    (sethash name watcher *watchers*)))
+  (save-watcher (make-watcher :name name :target target :parser parser
+                              :interval interval :handlers handlers)))
+
+(defmethod save-watcher ((watcher watcher))
+  (sethash (name watcher) watcher *watchers*))
 
 (defun get-watcher (watcher)
   (gethash watcher *watchers*))
