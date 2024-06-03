@@ -80,8 +80,7 @@
     (setf test-watcher
           (make-watcher
            :name "test2"
-           :target '*test-var*
-           :parser #'symbol-value
+           :parser '(symbol-value '*test-var*)
            :handlers (list
                       (make-handler :predicate `(in-content "watcher-current-value" "123") :recordp t :once t)
                       (make-handler :predicate '(content-updated "watcher-last-record-value" "watcher-current-value") :actions '((write-line-to "~/.makima-out" "watcher-last-record-value")))

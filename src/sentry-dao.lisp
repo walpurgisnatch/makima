@@ -24,6 +24,10 @@
     (with-accessors ((id id) (name func-name) (args func-args) (persist persist)) obj
       (format stream "~a: ~a ~a ~:[~;| persistent~]" id name args persist))))
 
+(defmethod fcall ((func common-functions) (watcher watcher))
+  (apply (makima-function (func-name func))
+         (parse-args (func-args func) watcher)))
+
 (defun make-func (type name args &optional (persist nil))
   (let ((name (string-downcase (string name)))
         (args (format nil "~{~a~^ ~}" args)))
@@ -56,10 +60,23 @@
   (make-dao 'watcher :name name :target target :parser parser
                      :interval interval :handlers handlers))
 
-;; (defun dao-parse ()
-;;   (let ((watchers (select-dao 'watcher)))
-;;     (loop for watcher in watchers)
-;;   ;; handlers
-;;   (with-accessors ((predicate-id predicate) (actions-ids actions) (recordp recordp)) handler
-;;       (let ((predicate (get-dao 'predicate predicate))
-;;           (actions (select-objects-from-array 'actions actions)))))
+(defmethod deserialize-handler ((handler handler))
+  (with-accessors ((predicate predicate) (actions actions)) handler
+    (let ((predicate-obj (get-dao 'predicate predicate))
+          (actions-obj (select-objects-from-array 'action actions)))
+      (setf predicate predicate-obj)
+      (setf actions actions-obj)
+      handler)))
+
+(defmethod deserialize-handlers ((watcher watcher))
+  (with-accessors ((handlers handlers)) watcher
+    (let ((handlers-obj (select-objects-from-array 'handler handlers)))
+      (setf handlers (mapcar #'deserialize-handler handlers-obj)))))
+       
+(defun dao-parse-watchers ()
+  (let ((watchers (select-dao 'watcher)))
+    (mapcar #'deserialize-handlers watchers)
+    (loop for watcher in watchers
+          unless (entry-exist (name watcher) *watchers*)
+            do (save-watcher watcher))))
+

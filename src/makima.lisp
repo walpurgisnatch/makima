@@ -17,8 +17,6 @@
 
 (in-package :makima)
 
-;(setup)
-
 (defun setup ()
   (parse-settings *vars-file*)
   (ensure-tables-exists '(watcher handler predicate action record))
@@ -33,6 +31,8 @@
                         '(:created "~a | was created with content [~a]"))
   (pero:create-template "files" '(:file "~a | event was triggered"))
   (pero:create-template "pages" '(:updated "~a | Was updated")))
+
+(setup)
 
 (defun main (&optional (sleep-time 1))
   ;; (makima.daemon:daemonize :exit-parent t)

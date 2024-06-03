@@ -48,7 +48,8 @@
 (defclass watcher ()
   ((name      :col-type string    :col-unique t
                                   :initarg :name      :accessor name)
-   (target    :col-type string    :initarg :target    :accessor target)
+   (target    :col-type (or string db-null) :initform nil
+                                  :initarg :target    :accessor target)
    (parser    :col-type string    :initarg :parser    :accessor parser)
    (interval  :col-type integer   :initarg :interval  :accessor interval :initform 60)
    (handlers  :col-type integer[] :initarg :handlers  :accessor handlers)
@@ -150,10 +151,6 @@
 (defmethod parse-args (list (watcher watcher))
   (map 'list #'(lambda (arg) (parse-arg arg watcher)) list))
 
-;; (defmethod fcall ((func common-functions) (watcher watcher))
-;;   (apply (makima-function (func-name func))
-;;          (parse-args (func-args func) watcher)))
-
 (defmethod fcall (func (watcher watcher))
   (apply (makima-function (car func))
          (parse-args (cdr func) watcher)))
@@ -168,7 +165,9 @@
 
 (defmethod parse-target ((watcher watcher))
   (with-accessors ((target target) (parse parser) (current current-value)) watcher
-    (setf current (funcall parse target))))
+    (if target
+        (setf current (funcall parse target))
+        (setf current (eval parse)))))
 
 (defmethod run-actions (actions (watcher watcher))
   (loop for action in actions
@@ -185,7 +184,7 @@
   (:documentation "Parse target, update timestamp and run all handlers"))
 
 (defmethod report ((watcher watcher))
-  (with-accessors ((handlers handlers) (timestamp timestamp)) watcher    
+  (with-accessors ((handlers handlers) (timestamp timestamp)) watcher
     (parse-target watcher)
     (setf timestamp (get-universal-time))
     (loop for handler in handlers
@@ -204,8 +203,8 @@
 (defmethod save-watcher ((watcher watcher))
   (sethash (name watcher) watcher *watchers*))
 
-(defun get-watcher (watcher)
-  (gethash watcher *watchers*))
+(defun get-watcher (name)
+  (gethash name *watchers*))
 
 (defun clear-watchers ()
   (setf *watchers* (make-hash-table :test 'equalp)))
