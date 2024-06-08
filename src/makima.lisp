@@ -4,6 +4,7 @@
         :makima.shared
         :makima.heart
         :makima.sentry
+        :makima.html-watcher
         :makima.predicates
         :makima.handlers)
   (:import-from :postmodern
@@ -17,9 +18,11 @@
 
 (in-package :makima)
 
+
 (defun setup ()
   (parse-settings *vars-file*)
   (ensure-tables-exists '(watcher handler predicate action record))
+  (read-watchers)
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"

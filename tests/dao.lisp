@@ -1,4 +1,4 @@
-(defpackage makima/tests/db
+(defpackage makima/tests/dao
   (:use :cl
         :makima.utils
         :makima.shared
@@ -6,9 +6,9 @@
         :makima/tests/main
         :postmodern
         :fiveam)
-  (:export :db-tests))
+  (:export :dao-tests))
 
-(in-package :makima/tests/db)
+(in-package :makima/tests/dao)
 
 (def-suite* dao-tests
   :in makima
