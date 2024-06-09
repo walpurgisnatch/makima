@@ -1,4 +1,3 @@
-(in-package :cl-user)
 (defpackage makima.sentry
   (:use :cl :postmodern :makima.utils :makima.predicates)
   (:import-from :pero
@@ -12,10 +11,12 @@
            
            :name
            :target
+           :parser
            :handlers
            :records
            :current-value
            :timestamp
+           
            :predicate
            :actions
            :recordp
@@ -38,6 +39,11 @@
            :interval-passed
            :create-watcher
            :save-watcher
+
+           :func-args
+           :dao-make-handler
+           :deserialize-handlers
+           :deserialize-parser
            :get-watcher
            :clear-watchers))
 
@@ -63,7 +69,7 @@
   (:table-name watchers))
 
 (defclass handler ()
-  ((id        :col-type integer   :col-identity t     :reader id          :initform nil)
+  ((id        :col-type integer   :col-identity t     :reader id)
    (name      :col-type (or string db-null)
                                   :initarg :name      :accessor name      :initform nil)
    (predicate :col-type integer   :initarg :predicate :accessor predicate :initform nil)

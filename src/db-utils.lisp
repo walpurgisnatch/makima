@@ -1,7 +1,7 @@
 (in-package :makima.utils)
 
 (defun table-name (table)
-  (format nil "~as" (string-downcase (string table))))
+  (format nil "~as" (substitute #\_ #\- (string-downcase (string table)))))
 
 (defun table-existp (table)
   (caar (query (format nil "select exists (select from information_schema.tables where table_name = '~a');" (table-name table)))))

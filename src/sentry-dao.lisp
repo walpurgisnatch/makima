@@ -1,12 +1,12 @@
 (in-package :makima.sentry)
 
 (defclass common-functions ()
-  ((id        :col-type integer :col-identity t    :reader id)
+  ((id        :col-type integer  :col-identity t    :reader id)
    (handler   :col-type (or integer db-null)
-                                :initarg :handler  :accessor func-handler)
-   (name      :col-type string  :initarg :name     :accessor func-name)
-   (args      :col-type string  :initarg :args     :accessor func-args)
-   (persist   :col-type boolean :initarg :persist  :accessor persist :initform nil))
+                                 :initarg :handler  :accessor func-handler)
+   (name      :col-type string   :initarg :name     :accessor func-name)
+   (args      :col-type string[] :initarg :args     :accessor func-args)
+   (persist   :col-type boolean  :initarg :persist  :accessor persist :initform nil))
   (:metaclass dao-class))
 
 (defclass predicate (common-functions) ()
@@ -30,7 +30,7 @@
 
 (defun make-func (type name args &optional (persist nil))
   (let ((name (string-downcase (string name)))
-        (args (format nil "~{~a~^ ~}" args)))
+        (args (coerce args 'vector)))
     (id (make-dao type :name name :args args :persist persist))))
 
 (defun create-func (type list)
@@ -57,8 +57,9 @@
     handler-id))
 
 (defun dao-make-watcher (&key name target parser (interval 60) handlers)
-  (make-dao 'watcher :name name :target target :parser parser
-                     :interval interval :handlers handlers))
+  (save-watcher
+   (make-dao 'watcher :name name :target target :parser parser
+                      :interval interval :handlers handlers)))
 
 (defmethod deserialize-handler ((handler handler))
   (with-accessors ((predicate predicate) (actions actions)) handler
@@ -72,11 +73,8 @@
   (with-accessors ((handlers handlers)) watcher
     (let ((handlers-obj (select-objects-from-array 'handler handlers)))
       (setf handlers (mapcar #'deserialize-handler handlers-obj)))))
-       
-(defun dao-parse-watchers ()
-  (let ((watchers (select-dao 'watcher)))
-    (mapcar #'deserialize-handlers watchers)
-    (loop for watcher in watchers
-          unless (entry-exist (name watcher) *watchers*)
-            do (save-watcher watcher))))
+
+(defun deserialize-parser (watcher)
+  (with-accessors ((parser parser)) watcher
+    (setf parser (symbol-function (intern (string-upcase parser) 'makima)))))
 

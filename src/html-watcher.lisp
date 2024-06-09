@@ -1,17 +1,22 @@
-(in-package :cl-user)
 (defpackage makima.html-watcher
   (:use :cl
         :postmodern
         :makima.utils
         :makima.predicates
         :makima.sentry)
-  (:export :create-html-watcher))
+  (:export :html-watcher
+           :page
+           :create-html-watcher
+           :dao-create-html-watcher
+           :parse-content))
 
 (in-package :makima.html-watcher)
 
 (defclass html-watcher (watcher)
-  ((page :initarg :page :accessor page))
-  (:metaclass dao-class))
+  ((page  :col-type (or string db-null) :initform nil
+                               :initarg :page :accessor page))
+  (:metaclass dao-class)
+  (:table-name html-watchers))
 
 (defmethod print-object ((obj html-watcher) stream)
   (print-unreadable-object (obj stream :type t)
@@ -20,23 +25,23 @@
 
 (defun create-html-watcher (&key name target parser interval handlers page)
   (save-watcher
-   (make-instance 'html-watcher :name name :target target :parser parser
-                                :interval interval :handlers handlers :page page)))
+   (make-instance 'html-watcher :name name :page page :target target :parser parser
+                                :interval interval :handlers handlers)))
 
-(defun dao-make-html-watcher (&key name target parser (interval 60) handlers)
+(defun dao-create-html-watcher (&key name target parser (interval 60) handlers page)
   (save-watcher
-   (make-dao 'watcher :name name :target target :parser parser
-                      :interval interval :handlers handlers)))
+   (make-dao 'html-watcher :name name :page page :target target :parser parser
+                           :interval interval :handlers handlers)))
 
 (defmethod parse-target ((watcher html-watcher))
   (with-accessors ((target target) (page page) (parse parser) (current current-value))
       watcher
     (setf current
-          (cond ((and parse target page)
+          (cond ((and parse page target)
                  (funcall parse page target))
                 ((and parse target)
                  (funcall parse target))
-                ((and paget target)
+                ((and page target)
                  (parse-content page target))))))
 
 (defun parse-content (page target)

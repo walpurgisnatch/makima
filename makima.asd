@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.2.8"
+  :version "0.3.0"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -26,6 +26,7 @@
                  (:file "sentry" :depends-on ("predicates" "handlers"))
                  (:file "sentry-dao" :depends-on ("sentry"))
                  (:file "html-watcher" :depends-on ("sentry"))
+                 (:file "dao-parser" :depends-on ("html-watcher"))
                  (:file "heart" :depends-on ("sentry"))
                  (:file "makima" :depends-on ("heart" "daemon")))))
   :in-order-to ((test-op (test-op "makima/tests"))))
@@ -43,5 +44,6 @@
                  (:file "data")
                  (:file "sentry" :depends-on ("main"))
                  (:file "server" :depends-on ("data"))
-                 (:file "html-watcher" :depends-on ("server" "main")))))
+                 (:file "html-watcher" :depends-on ("server" "main"))
+                 (:file "dao" :depends-on ("html-watcher")))))
   :perform (test-op (o c) (symbol-call :fiveam '#:run! 'makima)))

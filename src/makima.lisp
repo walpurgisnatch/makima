@@ -18,10 +18,9 @@
 
 (in-package :makima)
 
-
 (defun setup ()
   (parse-settings *vars-file*)
-  (ensure-tables-exists '(watcher handler predicate action record))
+  (ensure-tables-exists '(watcher html-watcher handler predicate action record))
   (read-watchers)
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
