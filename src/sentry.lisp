@@ -50,7 +50,8 @@
                                   :initarg :name      :accessor name)
    (target    :col-type (or string db-null) :initform nil
                                   :initarg :target    :accessor target)
-   (parser    :col-type string    :initarg :parser    :accessor parser)
+   (parser    :col-type (or string db-null) :initform nil
+                                  :initarg :parser    :accessor parser)
    (interval  :col-type integer   :initarg :interval  :accessor interval :initform 60)
    (handlers  :col-type integer[] :initarg :handlers  :accessor handlers)
    (current   :col-type (or string db-null) :initform nil

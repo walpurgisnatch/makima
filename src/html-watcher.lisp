@@ -23,8 +23,22 @@
    (make-instance 'html-watcher :name name :target target :parser parser
                                 :interval interval :handlers handlers :page page)))
 
+(defun dao-make-html-watcher (&key name target parser (interval 60) handlers)
+  (save-watcher
+   (make-dao 'watcher :name name :target target :parser parser
+                      :interval interval :handlers handlers)))
+
 (defmethod parse-target ((watcher html-watcher))
   (with-accessors ((target target) (page page) (parse parser) (current current-value))
       watcher
-    (setf current (ss:parse-text page target))))
+    (setf current
+          (cond ((and parse target page)
+                 (funcall parse page target))
+                ((and parse target)
+                 (funcall parse target))
+                ((and paget target)
+                 (parse-content page target))))))
+
+(defun parse-content (page target)
+  (ss:parse-text page target))
 
