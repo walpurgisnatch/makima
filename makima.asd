@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.2.0"
+  :version "0.3.0"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -9,17 +9,24 @@
                "local-time"
                "usocket"
                "cl-ppcre"
-               "ironclad")
+               "ironclad"
+               "postmodern"
+               "clack"
+               "ningle"
+               "jonathan")
   :components ((:module "src"
                 :components
                 ((:file "daemon")
-                 (:file "file-works")
-                 (:file "utils" :depends-on ("file-works"))
+                 (:file "utils")
+                 (:file "file-utils" :depends-on ("utils"))
+                 (:file "db-utils" :depends-on ("utils"))
                  (:file "shared" :depends-on ("utils"))
                  (:file "predicates" :depends-on ("shared"))
                  (:file "handlers" :depends-on ("shared"))
                  (:file "sentry" :depends-on ("predicates" "handlers"))
+                 (:file "sentry-dao" :depends-on ("sentry"))
                  (:file "html-watcher" :depends-on ("sentry"))
+                 (:file "dao-parser" :depends-on ("html-watcher"))
                  (:file "heart" :depends-on ("sentry"))
                  (:file "makima" :depends-on ("heart" "daemon")))))
   :in-order-to ((test-op (test-op "makima/tests"))))
@@ -29,8 +36,6 @@
                "ningle"
                "clack"
                "jonathan"
-               "pero"
-               "alexandria"
                "stepster"
                "makima")
   :components ((:module "tests"
@@ -39,5 +44,6 @@
                  (:file "data")
                  (:file "sentry" :depends-on ("main"))
                  (:file "server" :depends-on ("data"))
-                 (:file "html-watcher" :depends-on ("server" "main")))))
+                 (:file "html-watcher" :depends-on ("server" "main"))
+                 (:file "dao" :depends-on ("html-watcher")))))
   :perform (test-op (o c) (symbol-call :fiveam '#:run! 'makima)))

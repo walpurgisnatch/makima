@@ -1,6 +1,6 @@
 (in-package :cl-user)
 (defpackage :makima.utils
-  (:use :cl :makima.file-works)
+  (:use :cl :postmodern)
   (:export :string-starts-with
            :entry-exist
            :sethash
@@ -8,7 +8,17 @@
            :parse-float
            :makima-function
            :watcher-var
-           :watcher-varp))
+           :watcher-varp
+
+           :mkdir
+           :merge-with-dir
+           :ls
+           :upper-directory
+
+           :create-table
+           :ensure-tables-exists
+           :select-last
+           :select-objects-from-array))
 
 (in-package :makima.utils)
 

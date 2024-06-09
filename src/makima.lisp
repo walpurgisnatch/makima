@@ -4,15 +4,24 @@
         :makima.shared
         :makima.heart
         :makima.sentry
+        :makima.html-watcher
         :makima.predicates
         :makima.handlers)
+  (:import-from :postmodern
+                :execute
+                :query
+                :dao-table-definition)
   (:export :main
-           :setup))
+           :setup
+           :records-tablep
+           :create-records-table))
 
 (in-package :makima)
 
 (defun setup ()
   (parse-settings *vars-file*)
+  (ensure-tables-exists '(watcher html-watcher handler predicate action record))
+  (read-watchers)
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"
@@ -25,10 +34,13 @@
   (pero:create-template "files" '(:file "~a | event was triggered"))
   (pero:create-template "pages" '(:updated "~a | Was updated")))
 
+(setup)
+
 (defun main (&optional (sleep-time 1))
-  ;(makima.daemon:daemonize :exit-parent t)
+  ;; (makima.daemon:daemonize :exit-parent t)
   (setup)
   (loop while *heartbeat* do
-    (beat))
-  ;(makima.daemon:exit)
+    (with-connection '("makima" "makima" "makima" "localhost")
+      (beat)))
+  ;; (makima.daemon:exit)
   )

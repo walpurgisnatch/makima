@@ -1,13 +1,4 @@
-(in-package :cl-user)
-(defpackage :makima.file-works
-  (:use :cl)
-  (:export :pathname-as-directory
-           :merge-with-dir
-           :mkdir
-           :ls
-           :upper-directory))
-
-(in-package :makima.file-works)
+(in-package :makima.utils)
 
 (defun component-present-p (value)
   (and value (not (eql value :unspecific))))
