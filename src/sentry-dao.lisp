@@ -24,9 +24,12 @@
     (with-accessors ((id id) (name func-name) (args func-args) (persist persist)) obj
       (format stream "~a: ~a ~a ~:[~;| persistent~]" id name args persist))))
 
+(defun deserialize-args (string)
+  (cl-ppcre:split "," (cl-ppcre:regex-replace-all "(\{|\}|\"|\)" string "")))
+
 (defmethod fcall ((func common-functions) (watcher watcher))
   (apply (makima-function (func-name func))
-         (parse-args (func-args func) watcher)))
+         (parse-args (deserialize-args (func-args func)) watcher)))
 
 (defun make-func (type name args &optional (persist nil))
   (let ((name (string-downcase (string name)))

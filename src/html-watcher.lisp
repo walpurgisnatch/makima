@@ -12,6 +12,7 @@
 
 (in-package :makima.html-watcher)
 
+
 (defclass html-watcher (watcher)
   ((page  :col-type (or string db-null) :initform nil
                                :initarg :page :accessor page))
@@ -21,9 +22,9 @@
 (defmethod print-object ((obj html-watcher) stream)
   (print-unreadable-object (obj stream :type t)
     (with-accessors ((name name) (value current-value) (records records)) obj
-      (format stream "~a: ~a | ~a" name value (length records)))))
+      (format stream "~a: ~a | ~a records" name value (length records)))))
 
-(defun create-html-watcher (&key name target parser interval handlers page)
+(defun create-html-watcher (&key name target parser (interval 60) handlers page)
   (save-watcher
    (make-instance 'html-watcher :name name :page page :target target :parser parser
                                 :interval interval :handlers handlers)))

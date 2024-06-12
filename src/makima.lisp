@@ -10,7 +10,8 @@
   (:import-from :postmodern
                 :execute
                 :query
-                :dao-table-definition)
+                :dao-table-definition
+                :with-connection)
   (:export :main
            :setup
            :records-tablep
@@ -34,13 +35,12 @@
   (pero:create-template "files" '(:file "~a | event was triggered"))
   (pero:create-template "pages" '(:updated "~a | Was updated")))
 
-(setup)
-
 (defun main (&optional (sleep-time 1))
   ;; (makima.daemon:daemonize :exit-parent t)
   (setup)
   (loop while *heartbeat* do
     (with-connection '("makima" "makima" "makima" "localhost")
-      (beat)))
+      (beat))
+    (sleep sleep-time))
   ;; (makima.daemon:exit)
   )

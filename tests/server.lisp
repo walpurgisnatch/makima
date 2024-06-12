@@ -18,11 +18,16 @@
 
 (defvar *server* nil)
 
-(defparameter *items* '((:|id| 0 :|name| "item 1" :|description| "Lorem ipsum dolor sit amet, consectetur adipiscing elit." :|cost| 4100)
-                  (:|id| 1 :|name| "item 2" :|description| "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ullamcorper sapien tellus, sit amet facilisis erat varius ac. " :|cost| 2020)
-                  (:|id| 2 :|name| "another" :|description| "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " :|cost| 6000)
-                  (:|id| 3 :|name| "here we go" :|description| " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ullamcorper sapien tellus, sit amet facilisis erat varius ac. Quisque commodo elit neque, vel rhoncus nulla pulvinar et." :|cost| 1500)
+(defparameter *items* '((:|id| 0 :|name| "item 1" :|description| "Lorem ipsum dolor sit amet" :|cost| 4100)
+                  (:|id| 1 :|name| "item 2" :|description| "consectetur adipiscing elit." :|cost| 2020)
+                  (:|id| 2 :|name| "another" :|description| "Lorem ipsum" :|cost| 6000)
+                  (:|id| 3 :|name| "here we go" :|description| "vel rhoncus nulla pulvinar et." :|cost| 1500)
                   (:|id| 4 :|name| "sudo" :|description| "ls cd ls" :|cost| 3400)))
+
+(defparameter *big-json*
+  '((:|id| 0 :|name| "item 1" :|description| "Lorem ipsum dolor sit amet" :|cost| 4100)
+    (:|id| 1 :|name| "item 2" :|description| "consectetur adipiscing elit."
+             :|data| (:|kek| "wpek" :|here| ((:|wrong| "one" :|end| "here") (:|some| "stuff" :|more| (:|not| "this" :|target| "that will do" :|another| "not") :|lost| "end")) :|lost| "end"))))
 
 (defmacro defjsonroute (path &body body)
   `(setf (ningle:route *app* ,path)
@@ -64,6 +69,9 @@
     (setf (ningle:route *app* "/content") (car *content*))
 
     (defjsonroute "/api/items"
-      (jonathan:to-json *items*))))
+      (jonathan:to-json *items*))
+    
+    (defjsonroute "/api/bigone"
+      (jonathan:to-json *big-json*))))
 
 (define-routes)
