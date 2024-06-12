@@ -27,6 +27,7 @@
 (defparameter *test-var* "100")
 
 (test init
+  (clear-watchers)
   (with-connection '("makimatest" "makima" "makima" "localhost")
     (create-table 'record)
     (clear-records)))
@@ -41,3 +42,4 @@
     (with-connection '("makimatest" "makima" "makima" "localhost")
       (beat)
       (is (string= "100" (last-record-value watcher))))))
+

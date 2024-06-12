@@ -49,17 +49,13 @@
                                   :actions '((tg-message "current value - ~a" "watcher-current-value"))))))
   (clear-watchers))
 
-
-(with-connection '("makimatest" "makima" "makima" "localhost")
-  (print (func-args (car (actions (car (handlers *test-watcher*)))))))
-
 (test html-watcher-test
   (with-connection '("makimatest" "makima" "makima" "localhost")
     (dao-parse-watchers)
     (is (gethash "dao-test" *watchers*))
     (setf *test-watcher* (gethash "dao-test" *watchers*))
     (is (null (records *test-watcher*)))
-    (is (not (current-value *test-watcher*)))
+    (is (string= "false" (current-value *test-watcher*)))
     (report *test-watcher*)
     (is (= 1 (length (records *test-watcher*))))
     (is (string= "10" (current-value *test-watcher*)))
