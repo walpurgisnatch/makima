@@ -31,3 +31,15 @@
 
 (defun less-or-equal-than (content arg)
   (string-as-float-comparsion <= content arg))
+
+(defun time-is (&key month day hour min)
+  (let ((result t))
+    (multiple-value-bind
+          (second current-min current-hour current-day current-month)
+        (get-decoded-time)
+      (when (or (and min (/= current-min min))
+                (and hour (/= current-hour hour))
+                (and day (/= current-day day))
+                (and month (/= current-month month)))        
+        (setf result nil)))
+    result))
