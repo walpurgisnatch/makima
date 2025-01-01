@@ -40,7 +40,7 @@
     (clear-tables)
     (dao-create-html-watcher
      :name "dao-test"
-     :page "localhost:5000/content"
+     :page "http://localhost:5000/content"
      :target ".link"
      :parser "parse-content"
      :handlers (vector

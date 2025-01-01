@@ -7,12 +7,12 @@
   (:export :log-update
            :write-line-to
            :tg-message
-           :shell))
+           :run-external))
 
 (in-package :makima.handlers)
 
 (defun log-update (name content)
-    (write-log :changes name content))
+  (write-log :changes name content))
 
 (defun write-line-to (file line)
    (with-open-file (stream file :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -23,5 +23,5 @@
             :content `(("chat_id" . ,(setting "tg-user-id"))
                        ("text" . ,(apply #'format nil format args)))))
 
-(defun shell (&rest args)
+(defun run-external (&rest args)
   (uiop:run-program (format nil "~{~a~^ ~}" args) :output :string))

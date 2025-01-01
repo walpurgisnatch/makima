@@ -25,7 +25,7 @@
   (setf *test-watcher*
         (create-html-watcher
          :name "html-test"
-         :page "localhost:5000/content"
+         :page "http://localhost:5000/content"
          :target ".link"
          :parser #'ss:parse-text
          :handlers (list

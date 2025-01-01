@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.3.1"
+  :version "0.4.0"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -13,7 +13,8 @@
                "postmodern"
                "clack"
                "ningle"
-               "jonathan")
+               "jonathan"
+               "file-attributes")
   :components ((:module "src"
                 :components
                 ((:file "daemon")
@@ -29,7 +30,11 @@
                  (:file "api-watcher" :depends-on ("sentry"))
                  (:file "dao-parser" :depends-on ("html-watcher" "api-watcher"))
                  (:file "heart" :depends-on ("sentry"))
-                 (:file "makima" :depends-on ("heart" "daemon")))))
+                 (:file "makima" :depends-on ("heart" "daemon"))))
+               (:module "server"
+                :components
+                ((:file "server")
+                 (:file "sentry-controller" :depends-on ("server")))))
   :in-order-to ((test-op (test-op "makima/tests"))))
 
 (defsystem "makima/tests"
