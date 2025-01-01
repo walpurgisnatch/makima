@@ -61,19 +61,26 @@
       (handle handler1 test-watcher)
       (is (string= "100" (current-value test-watcher)))
       (is (null (last-record-value test-watcher)))
+      
       (set '*test-var* "123")
       (handle handler1 test-watcher t)
       (is (string= "123" (current-value test-watcher)))
       (is (= 1 (length (records test-watcher))))
       (is (string= "123" (last-record-value test-watcher)))
+      
       (set '*test-var* "180")
       (is (out-content "nil"))
       (handle handler2 test-watcher)
       (is (string= "123" (last-record-value test-watcher)))
       (is (out-content "123"))
+      
       (handle handler3 test-watcher t)
       (is (string= "180" (last-record-value test-watcher)))
-      (is (out-content "180")))))
+      (is (out-content "180"))
+      (is (= 2 (length (records test-watcher))))
+      (is (= 1 (length (records test-watcher :limit 1))))
+      (is (= 0 (id (car (records test-watcher :limit 1)))))
+      (is (= 1 (id (car (records test-watcher :limit 1 :offset 1))))))))
 
 (test report-test
   (with-connection '("makimatest" "makima" "makima" "localhost")

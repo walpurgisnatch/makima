@@ -24,7 +24,7 @@
   (setf *test-watcher*
         (create-api-watcher
          :name "api-test"
-         :url "localhost:5000/api/bigone"
+         :url "http://localhost:5000/api/bigone"
          :target "target"
          :handlers (list
                     (make-handler :recordp t))))

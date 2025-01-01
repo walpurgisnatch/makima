@@ -5,7 +5,8 @@
            :*vars-file*
            :*sentry-file*
            :read-watchers
-           :tg-api))
+           :watchers-updatedp
+           :format-time))
 
 (in-package :makima.shared)
 
@@ -13,6 +14,9 @@
 (defparameter *vars-file* (merge-with-dir "makima.conf" *root-folder*))
 (defparameter *sentry-file* (merge-with-dir "sentry.lisp" *root-folder*))
 (defparameter *data-folder* (merge-with-dir "data/" *root-folder*))
+
+(defparameter *watchers-updated-at*
+  (org.shirakumo.file-attributes:modification-time #p"~/.makima/sentry.lisp"))
 
 (defparameter *settings* nil)
 
@@ -28,6 +32,12 @@
                         settings)))
     (setf *settings* settings)))
 
+(defun watchers-updatedp ()
+  (let ((current (org.shirakumo.file-attributes:modification-time #p"~/.makima/sentry.lisp")))
+    (when (< *watchers-updated-at* current)
+      (setf *watchers-updated-at* current)
+      t)))
+
 (defun read-watchers ()
   (with-open-file (stream *sentry-file* :if-does-not-exist nil)
     (loop for expression = (read stream nil)
@@ -36,3 +46,10 @@
 
 (defun setting (key)
   (gethash key *settings*))
+
+(defun format-time  (timestamp)
+  (when (stringp timestamp) (setf timestamp (parse-integer timestamp)))
+  (local-time:format-timestring
+   nil
+   (local-time:universal-to-timestamp timestamp)
+   :format '(:year "-" :month "-" :day " " :hour ":" :min)))

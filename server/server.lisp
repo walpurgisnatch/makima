@@ -1,19 +1,19 @@
 (defpackage makima.server
-  (:use :cl)
+  (:use :cl :makima.heart)
+  (:import-from :postmodern
+                :with-connection)
   (:import-from :makima.sentry
                 :get-watcher
                 :records)
   (:export :start
-           :stop))
+           :stop
+           :params))
 
 (in-package :makima.server)
 
 (defvar *app* (make-instance 'ningle:<app>))
 
 (defvar *server* nil)
-
-(defun api-path (path)
-  (concatenate 'string "/api" path))
 
 (defmacro defroute (path &body body)
   `(setf (ningle:route *app*
@@ -23,7 +23,8 @@
                    (append (lack.response:response-headers ningle:*response*)
                            (list :content-type "application/json")
                            (list :access-control-allow-origin "*")))
-             ,@body)))
+             (with-connection '("makima" "makima" "makima" "localhost")
+               ,@body))))
 
 (defun start ()
   (if *server*
@@ -36,6 +37,16 @@
              (setf *server* nil))
       (format t "Not running")))
 
-(defroute "/:watcher/records"
-  (let ((watcher (cdr (assoc :watcher params))))
-  (records (get-watcher watcher))))
+(defun heartbeat ()
+  (if *heartbeat*
+      "true"
+      "false"))
+
+(setf (ningle:route *app* "/heart-beat")
+      #'(lambda (params)
+          (heartbeat)))
+
+(setf (ningle:route *app* "/heart-stop")
+      #'(lambda (params)
+          (heart-stop)
+          (heartbeat)))

@@ -16,6 +16,9 @@
            :records
            :current-value
            :timestamp
+
+           :id
+           :value
            
            :predicate
            :actions
@@ -27,6 +30,7 @@
            :get-record
            :last-record
            :last-record-value
+           :last-record-timestamp
            :parse-arg
            :parse-args
            :make-handler
@@ -94,7 +98,7 @@
 (defmethod print-object ((obj watcher) stream)
   (print-unreadable-object (obj stream :type t)
     (with-accessors ((name name) (value current-value) (records records)) obj
-      (format stream "~a: ~a | ~a " name value (length records)))))
+      (format stream "~a: ~a, parsed: ~a | ~a records " name value (last-record-timestamp obj) (length records)))))
 
 (defmethod print-object ((obj handler) stream)
   (print-unreadable-object (obj stream :type t)
@@ -117,9 +121,15 @@
         (make-dao 'record :id 0 :value value :watcher watcher-name
                           :timestamp (get-universal-time)))))
 
-(defmethod records ((watcher watcher))
+(defmethod records ((watcher watcher) &key limit offset)
   (with-accessors ((watcher-name name)) watcher
-    (select-dao 'record (:= 'watcher watcher-name))))
+    (if limit
+        (query-dao 'record
+                   (:limit                    
+                     (:select '* :from 'records
+                      :where (:= 'watcher watcher-name))
+                    limit (or offset 0)))
+        (select-dao 'record (:= 'watcher watcher-name)))))
 
 (defmethod get-record ((watcher watcher) index)
   (with-accessors ((watcher-name name)) watcher
@@ -139,8 +149,12 @@
   (let ((last (last-record watcher)))
     (when last (value (last-record watcher)))))
 
+(defmethod last-record-timestamp ((watcher watcher))
+  (let ((last (last-record watcher)))
+    (when last (timestamp (last-record watcher)))))
+
 ;;; handlers
-(defmethod make-handler (&key predicate actions recordp once)
+(defun make-handler (&key predicate actions recordp once)
   (make-instance 'handler :predicate predicate :actions actions
                           :recordp recordp :once once))
 
@@ -163,9 +177,13 @@
          (parse-args (cdr func) watcher)))
 
 ;;; main
-(defun make-watcher (&key name target parser (interval 60) handlers)
+(defun make-watcher (&key name target parser interval handlers)
   (make-instance 'watcher :name name :target target :parser parser
                           :interval interval :handlers handlers))
+
+(defmethod initialize-instance :after ((watcher watcher) &key)
+  (with-slots (interval) watcher
+    (unless interval (setf interval 60))))
 
 (defgeneric parse-target (watcher)
   (:documentation "Parse and return value from target"))
@@ -215,3 +233,4 @@
 
 (defun clear-watchers ()
   (setf *watchers* (make-hash-table :test 'equalp)))
+
