@@ -125,9 +125,11 @@
   (with-accessors ((watcher-name name)) watcher
     (if limit
         (query-dao 'record
-                   (:limit                    
+                   (:limit
+                    (:order-by
                      (:select '* :from 'records
                       :where (:= 'watcher watcher-name))
+                     (:desc 'id))
                     limit (or offset 0)))
         (select-dao 'record (:= 'watcher watcher-name)))))
 

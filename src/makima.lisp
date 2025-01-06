@@ -34,13 +34,13 @@
                         '(:trigger "~a | triggered by value [~a]")
                         '(:created "~a | was created with content [~a]"))
   (pero:create-template "files" '(:file "~a | event was triggered"))
-  (pero:create-template "pages" '(:updated "~a | Was updated")))
+  (pero:create-template "pages" '(:updated "~a | Was updated"))
+  (read-watchers))
 
 (setup)
 
 (defun main (&optional server (sleep-time 1))
   (heart-start)
-  (read-watchers)
   (print 'started)
   (makima.daemon:daemonize :exit-parent t)
   (when server (funcall server))

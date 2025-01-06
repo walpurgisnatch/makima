@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.4.0"
+  :version "0.5.0"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -53,4 +53,4 @@
                  (:file "html-watcher" :depends-on ("server" "main"))
                  (:file "api-watcher" :depends-on ("server" "main"))
                  (:file "dao" :depends-on ("html-watcher")))))
-  :perform (test-op (o c) (symbol-call :fiveam '#:run! 'makima)))
+  :perform (test-op (o c) (symbol-call :fiveam '#:run! (find-symbol* :makima :makima/tests/main))))
