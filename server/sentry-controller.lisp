@@ -29,7 +29,7 @@
     (maphash #'(lambda (name watcher) (declare (ignorable name))
                  (push (watcher-data watcher) result))
              *watchers*)
-    (ss:pack-to-json '(name value records parsed) result)))
+    (ss:pack-to-json '(name value "recordsCount" parsed) result)))
 
 (defun records-json (watcher &optional limit offset)
   (json-data-of (records watcher :limit limit :offset offset) (id watcher value timestamp) (id watcher value timestamp)))
@@ -47,7 +47,7 @@
 ;; TODO Pack to json works only on lists
 (defroute "/:watcher"
   (let ((watcher (cdr (assoc :watcher makima.server:params))))
-    (ss:pack-to-json '(name value records parsed) (list (watcher-data (get-watcher watcher))))))
+    (ss:pack-to-json '(name value "recordsCount" parsed) (watcher-data (get-watcher watcher)))))
 
 (defroute "/:watcher/last-value"
   (let ((watcher (cdr (assoc :watcher makima.server:params))))

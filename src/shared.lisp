@@ -52,4 +52,4 @@
   (local-time:format-timestring
    nil
    (local-time:universal-to-timestamp timestamp)
-   :format '(:year "-" :month "-" :day " " :hour ":" :min)))
+   :format '(:day "." :month "." :year " " :hour ":" :min)))
