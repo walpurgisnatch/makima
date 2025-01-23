@@ -16,7 +16,6 @@
            :upper-directory
 
            :create-table
-           :ensure-tables-exists
            :select-last
            :select-objects-from-array))
 

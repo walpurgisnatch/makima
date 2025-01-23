@@ -10,11 +10,6 @@
   (unless (table-existp table)
     (execute (dao-table-definition table))))
 
-(defun ensure-tables-exists (tables)
-  (with-connection '("makima" "makima" "makima" "localhost")
-    (loop for table in tables
-          do (create-table table))))
-
 (defun select-last (table table-name &key test)
   (car (query-dao table (:limit
                          (:order-by

@@ -6,7 +6,9 @@
            :*sentry-file*
            :read-watchers
            :watchers-updatedp
-           :format-time))
+           :format-time
+           :db-credentials
+           :ensure-tables-exists))
 
 (in-package :makima.shared)
 
@@ -42,6 +44,7 @@
   (with-open-file (stream *sentry-file* :if-does-not-exist nil)
     (loop for expression = (read stream nil)
           while expression
+          do (print expression)
           do (eval expression))))
 
 (defun setting (key)
@@ -53,3 +56,14 @@
    nil
    (local-time:universal-to-timestamp timestamp)
    :format '(:day "." :month "." :year " " :hour ":" :min)))
+
+(defun db-credentials ()
+  (list (setting "db-name")
+        (setting "db-user")
+        (setting "db-pass")
+        (setting "db-host")))
+
+(defun ensure-tables-exists (tables)
+  (postmodern:with-connection (db-credentials)
+    (loop for table in tables
+          do (create-table table))))

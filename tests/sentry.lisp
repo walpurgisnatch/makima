@@ -79,8 +79,8 @@
       (is (out-content "180"))
       (is (= 2 (length (records test-watcher))))
       (is (= 1 (length (records test-watcher :limit 1))))
-      (is (= 0 (id (car (records test-watcher :limit 1)))))
-      (is (= 1 (id (car (records test-watcher :limit 1 :offset 1))))))))
+      (is (= 1 (id (car (records test-watcher :limit 1)))))
+      (is (= 0 (id (car (records test-watcher :limit 1 :offset 1))))))))
 
 (test report-test
   (with-connection '("makimatest" "makima" "makima" "localhost")

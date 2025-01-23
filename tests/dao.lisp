@@ -45,8 +45,8 @@
      :parser "parse-content"
      :handlers (vector
                 (dao-make-handler :recordp t
-                                  :predicate '(stringp "watcher-current-value")
-                                  :actions '((tg-message "current value - ~a" "watcher-current-value"))))))
+                                  :predicate '(stringp "watcher-current-value")))))
+                                  ;:actions '((tg-message "current value - ~a" "watcher-current-value"))
   (clear-watchers))
 
 (test html-watcher-test

@@ -23,7 +23,6 @@
 
 (defun setup ()
   (parse-settings *vars-file*)
-  (ensure-tables-exists '(watcher html-watcher handler predicate action record))
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"
@@ -35,6 +34,7 @@
                         '(:created "~a | was created with content [~a]"))
   (pero:create-template "files" '(:file "~a | event was triggered"))
   (pero:create-template "pages" '(:updated "~a | Was updated"))
+  (ensure-tables-exists '(watcher html-watcher handler predicate action record))
   (read-watchers))
 
 (setup)
@@ -49,7 +49,7 @@
           (print "updated")
           (read-watchers)
         end
-        do (with-connection '("makima" "makima" "makima" "localhost")
+        do (with-connection (db-credentials)
              (beat))
            (sleep sleep-time))
   (makima.daemon:exit))
@@ -62,7 +62,7 @@
           (print "updated")
           (read-watchers)
         end
-        do (with-connection '("makima" "makima" "makima" "localhost")
+        do (with-connection (db-credentials)
              (beat))
            (sleep sleep-time)))
 
