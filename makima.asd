@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.5.2"
+  :version "0.5.3"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
