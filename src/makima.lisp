@@ -54,9 +54,9 @@
            (sleep sleep-time))
   (makima.daemon:exit))
 
-(defun main-deamonless (&optional (sleep-time 1))
+(defun main-deamonless (&optional server (sleep-time 1))
   (heart-start)
-  (read-watchers)
+  (when server (funcall server))
   (loop while *heartbeat*
         when (watchers-updatedp) do
           (print "updated")

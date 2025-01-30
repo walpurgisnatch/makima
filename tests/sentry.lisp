@@ -46,11 +46,12 @@
                       (make-handler :recordp t :actions '((write-line-to "~/.makima-out" "watcher-last-record-value"))))))))
 
 (test basic-test
-  (let ((args '("watcher-name" "counter" "watcher-parse-target" "0" "watcher-target")))
-    (is (equal '("test" "counter" "100" "0" *test-var*) (parse-args args test-watcher)))
-    (is (= (fcall `(+ ,counter 5) test-watcher) 5))
-    (is (string= (fcall '(concatenate string "kek" "wpek") test-watcher) "kekwpek"))
-    (is (string= (fcall '(concatenate string "watcher-name" "-case") test-watcher) "test-case"))))
+  (with-connection '("makimatest" "makima" "makima" "localhost")
+    (let ((args '("watcher-name" "counter" "watcher-parse-target" "0" "watcher-target")))
+      (is (equal '("test" "counter" "100" "0" *test-var*) (parse-args args test-watcher)))
+      (is (= (fcall `(+ ,counter 5) test-watcher) 5))
+      (is (string= (fcall '(concatenate string "kek" "wpek") test-watcher) "kekwpek"))
+      (is (string= (fcall '(concatenate string "watcher-name" "-case") test-watcher) "test-case")))))
 
 (test handler-test
   (with-connection '("makimatest" "makima" "makima" "localhost")

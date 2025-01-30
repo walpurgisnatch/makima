@@ -55,7 +55,7 @@
   (local-time:format-timestring
    nil
    (local-time:universal-to-timestamp timestamp)
-   :format '(:day "." :month "." :year " " :hour ":" :min)))
+   :format '((:day 2) "." (:month 2) "." :year " " (:hour 2) ":" (:min 2))))
 
 (defun db-credentials ()
   (list (setting "db-name")

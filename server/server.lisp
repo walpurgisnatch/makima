@@ -5,6 +5,8 @@
   (:import-from :makima.sentry
                 :get-watcher
                 :records)
+  (:import-from :makima.shared
+                :db-credentials)
   (:export :start
            :stop
            :params))
