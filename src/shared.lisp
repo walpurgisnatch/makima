@@ -44,7 +44,6 @@
   (with-open-file (stream *sentry-file* :if-does-not-exist nil)
     (loop for expression = (read stream nil)
           while expression
-          do (print expression)
           do (eval expression))))
 
 (defun setting (key)

@@ -1,5 +1,5 @@
 (defpackage makima.sentry
-  (:use :cl :postmodern :makima.utils :makima.predicates)
+  (:use :cl :postmodern :makima.utils)
   (:import-from :pero
                 :write-log)
   (:export :*watchers*
@@ -29,8 +29,6 @@
            :push-record
            :get-record
            :last-record
-           :last-record-value
-           :last-record-timestamp
            :parse-arg
            :parse-args
            :make-handler
@@ -49,7 +47,12 @@
            :deserialize-handlers
            :deserialize-parser
            :get-watcher
-           :clear-watchers))
+           :clear-watchers
+
+           :handler-list
+           :last-records-values
+           :last-record-value
+           :last-record-timestamp))
 
 (in-package :makima.sentry)
 
@@ -147,14 +150,6 @@
                       (:desc 'id))
                      1)))))
 
-(defmethod last-record-value ((watcher watcher))
-  (let ((last (last-record watcher)))
-    (when last (value (last-record watcher)))))
-
-(defmethod last-record-timestamp ((watcher watcher))
-  (let ((last (last-record watcher)))
-    (when last (timestamp (last-record watcher)))))
-
 ;;; handlers
 (defun make-handler (&key predicate actions recordp once)
   (make-instance 'handler :predicate predicate :actions actions
@@ -166,9 +161,18 @@
                                  :recordp recordp :once once)))
       (push handler handlers))))
 
+;; Lightweight this stuff if wont be in use for some time
+(defun parse-watcher-var (var)
+  (cl-ppcre:split ":" (watcher-var var)))
+
+(defmethod call-watcher-var (var (watcher watcher))
+  (let ((parsed (parse-watcher-var var)))
+    (apply (makima-function (car parsed))
+           (concatenate 'list (list watcher) (cdr parsed)))))
+
 (defmethod parse-arg (arg (watcher watcher))
   (if (watcher-varp arg)
-      (funcall (watcher-var arg) watcher)
+      (call-watcher-var arg watcher)
       arg))
 
 (defmethod parse-args (list (watcher watcher))
@@ -176,7 +180,7 @@
 
 (defmethod fcall (func (watcher watcher))
   (apply (makima-function (car func))
-         (parse-args (cdr func) watcher)))
+         (concatenate 'list (list watcher) (parse-args (cdr func) watcher))))
 
 ;;; main
 (defun make-watcher (&key name target parser interval handlers)
