@@ -28,8 +28,7 @@
          :page "http://localhost:5000/content"
          :target ".link"
          :parser #'ss:parse-text
-         :handlers (list
-                    (make-handler :recordp t))))
+         :handlers (handler-list (:recordp t))))
   (start)
   (sleep 2))
 

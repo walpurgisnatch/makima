@@ -6,7 +6,9 @@
            :*sentry-file*
            :read-watchers
            :watchers-updatedp
-           :format-time))
+           :format-time
+           :db-credentials
+           :ensure-tables-exists))
 
 (in-package :makima.shared)
 
@@ -52,4 +54,15 @@
   (local-time:format-timestring
    nil
    (local-time:universal-to-timestamp timestamp)
-   :format '(:year "-" :month "-" :day " " :hour ":" :min)))
+   :format '((:day 2) "." (:month 2) "." :year " " (:hour 2) ":" (:min 2))))
+
+(defun db-credentials ()
+  (list (setting "db-name")
+        (setting "db-user")
+        (setting "db-pass")
+        (setting "db-host")))
+
+(defun ensure-tables-exists (tables)
+  (postmodern:with-connection (db-credentials)
+    (loop for table in tables
+          do (create-table table))))

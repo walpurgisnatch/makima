@@ -1,7 +1,5 @@
 (defpackage makima.predicates
-  (:use :cl :makima.utils)
-  (:import-from :pero
-                :write-log)
+  (:use :cl :makima.utils :makima.sentry)
   (:export :content-updated
            :in-content
            :more-than
@@ -14,23 +12,8 @@
 (defmacro string-as-float-comparsion (fun &rest args)
   `(,fun ,@(loop for arg in args collect `(parse-float ,arg))))
 
-(defun content-updated (last new)
-  (not (equal last new)))
-
-(defun in-content (content regex)
-  (cl-ppcre:scan-to-strings regex content))
-
-(defun more-than (content arg)
-  (string-as-float-comparsion > content arg))
-
-(defun more-or-equal-than (content arg)
-  (string-as-float-comparsion >= content arg))
-
-(defun less-than (content arg)
-  (string-as-float-comparsion < content arg))
-
-(defun less-or-equal-than (content arg)
-  (string-as-float-comparsion <= content arg))
+(defmacro defpred (name args &body body)
+  `(defun ,name (watcher ,@args) ,@body))
 
 (defun time-is (&key month day hour min)
   (let ((result t))
@@ -43,3 +26,22 @@
                 (and month (/= current-month month)))        
         (setf result nil)))
     result))
+
+(defpred content-updated ()
+  (not (equal (last-record-value watcher)
+              (current-value watcher))))
+
+(defpred in-content (regex)
+  (cl-ppcre:scan-to-strings regex (current-value watcher)))
+
+(defpred more-than (arg)
+  (string-as-float-comparsion > (current-value watcher) arg))
+
+(defpred more-or-equal-than (arg)
+  (string-as-float-comparsion >= (current-value watcher) arg))
+
+(defpred less-than (arg)
+  (string-as-float-comparsion < (current-value watcher) arg))
+
+(defpred less-or-equal-than (arg)
+  (string-as-float-comparsion <= (current-value watcher) arg))

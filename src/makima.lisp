@@ -23,7 +23,6 @@
 
 (defun setup ()
   (parse-settings *vars-file*)
-  (ensure-tables-exists '(watcher html-watcher handler predicate action record))
   (pero:logger-setup "~/makima-logs")
   (pero:create-template "logs" '(:log "~a"))
   (pero:create-template "errors"
@@ -34,13 +33,14 @@
                         '(:trigger "~a | triggered by value [~a]")
                         '(:created "~a | was created with content [~a]"))
   (pero:create-template "files" '(:file "~a | event was triggered"))
-  (pero:create-template "pages" '(:updated "~a | Was updated")))
+  (pero:create-template "pages" '(:updated "~a | Was updated"))
+  (ensure-tables-exists '(watcher html-watcher handler predicate action record))
+  (read-watchers))
 
 (setup)
 
 (defun main (&optional server (sleep-time 1))
   (heart-start)
-  (read-watchers)
   (print 'started)
   (makima.daemon:daemonize :exit-parent t)
   (when server (funcall server))
@@ -49,20 +49,20 @@
           (print "updated")
           (read-watchers)
         end
-        do (with-connection '("makima" "makima" "makima" "localhost")
+        do (with-connection (db-credentials)
              (beat))
            (sleep sleep-time))
   (makima.daemon:exit))
 
-(defun main-deamonless (&optional (sleep-time 1))
+(defun main-deamonless (&optional server (sleep-time 1))
   (heart-start)
-  (read-watchers)
+  (when server (funcall server))
   (loop while *heartbeat*
         when (watchers-updatedp) do
           (print "updated")
           (read-watchers)
         end
-        do (with-connection '("makima" "makima" "makima" "localhost")
+        do (with-connection (db-credentials)
              (beat))
            (sleep sleep-time)))
 

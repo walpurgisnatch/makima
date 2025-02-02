@@ -1,7 +1,8 @@
 (in-package :cl-user)
 (defpackage :makima.utils
   (:use :cl :postmodern)
-  (:export :string-starts-with
+  (:export :carlast
+           :string-starts-with
            :entry-exist
            :sethash
            :make-hash
@@ -16,7 +17,6 @@
            :upper-directory
 
            :create-table
-           :ensure-tables-exists
            :select-last
            :select-objects-from-array))
 
@@ -27,6 +27,9 @@
      (if (cdr data)
          data
          (car data))))
+
+(defun carlast (x)
+  (car (last x)))
 
 (defun string-starts-with (string x)
   (when (> (length string) (length x))
@@ -59,7 +62,7 @@
 
 (defun watcher-var (var)
   "Cut off watcher- part"
-  (makima-function (subseq var 8)))
+  (subseq var 8))
 
 (defun watcher-varp (string)
   (when (stringp string)

@@ -5,6 +5,8 @@
   (:import-from :makima.sentry
                 :get-watcher
                 :records)
+  (:import-from :makima.shared
+                :db-credentials)
   (:export :start
            :stop
            :params))
@@ -23,7 +25,7 @@
                    (append (lack.response:response-headers ningle:*response*)
                            (list :content-type "application/json")
                            (list :access-control-allow-origin "*")))
-             (with-connection '("makima" "makima" "makima" "localhost")
+             (with-connection (db-credentials)
                ,@body))))
 
 (defun start ()
