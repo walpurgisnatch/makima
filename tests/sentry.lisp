@@ -16,11 +16,8 @@
   :in makima
   :description "Default watcher tests")
 
-(defun read-file (file)
-  (string-trim '(#\Newline) (alexandria:read-file-into-string file)))
-
-(defun out-content (test)
-  (cl-ppcre:scan-to-strings test (read-file "~/.makima-out")))
+(defun out-content ()
+  (string-trim '(#\Newline) (alexandria:read-file-into-string "~/.makima-out")))
 
 (defun write-line-to (watcher file &optional line)
   (declare (ignore watcher))
@@ -42,16 +39,28 @@
            :target '*test-var*
            :parser #'symbol-value
            :handlers (handler-list
-                      (:predicate `(in-content "123") :recordp t :once t)
-                      (:predicate '(content-updated) :actions '((write-line-to "~/.makima-out" "watcher-last-record-value")))
-                      (:recordp t :actions '((write-line-to "~/.makima-out" "watcher-last-record-value"))))))))
+                      (:recordp t)
+                      (:predicate `(in-content "100") :actions '((write-line-to "~/.makima-out" "watcher-current-value")) :once t)
+                      (:predicate '(pump-for 1 20) :actions '((write-line-to "~/.makima-out" "pumped")))
+                      (:predicate '(fall-for 1 -10) :actions '((write-line-to "~/.makima-out" "falled"))))))))
 
 (test report-test
   (with-connection '("makimatest" "makima" "makima" "localhost")
-    (set '*test-var* "123")
     (report test-watcher)
     (is (<= (- (get-universal-time) (timestamp test-watcher)) 3))
     (is (= 1 (length (records test-watcher))))
-    (is (string= "123" (last-record-value test-watcher)))
-    (is (out-content "123"))))
+    (is (string= "100" (last-record-value test-watcher)))
+    (is (string= (out-content) "100"))
+    
+    (set '*test-var* "123")
+    (report test-watcher)
+    (is (string= (out-content) "pumped"))
+
+    (set '*test-var* "120")
+    (report test-watcher)
+    (is (string= (out-content) "pumped"))
+
+    (set '*test-var* "80")
+    (report test-watcher)
+    (is (string= (out-content) "falled"))))
 

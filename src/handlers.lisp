@@ -11,17 +11,20 @@
 
 (in-package :makima.handlers)
 
-(defun log-update (name content)
+(defmacro defaction (name args &body body)
+  `(defun ,name (watcher ,@args) ,@body))
+
+(defaction log-update (name content)
   (write-log :changes name content))
 
-(defun write-line-to (file line)
+(defaction write-line-to (file line)
    (with-open-file (stream file :direction :output :if-exists :supersede :if-does-not-exist :create)
     (write-line (or line "nil") stream)))
 
-(defun tg-message (format &rest args)
+(defaction tg-message (format &rest args)
   (dex:post (format nil (setting "tg-api") (setting "tg-token") "sendMessage")
             :content `(("chat_id" . ,(setting "tg-user-id"))
                        ("text" . ,(apply #'format nil format args)))))
 
-(defun run-external (&rest args)
+(defaction run-external (&rest args)
   (uiop:run-program (format nil "~{~a~^ ~}" args) :output :string))

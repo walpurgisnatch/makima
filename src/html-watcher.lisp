@@ -13,7 +13,6 @@
 
 (in-package :makima.html-watcher)
 
-
 (defclass html-watcher (watcher)
   ((page  :col-type (or string db-null) :initform nil
                                :initarg :page :accessor page))

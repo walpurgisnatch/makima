@@ -10,6 +10,7 @@
            :makima-function
            :watcher-var
            :watcher-varp
+           :hours-to-sec
 
            :mkdir
            :merge-with-dir
@@ -47,15 +48,13 @@
     :md5
     (ironclad:ascii-string-to-byte-array string))))
 
-(defun parse-float (string)
+(defun parse-float (str)
   (declare (optimize (speed 3) (safety 2)))
-  (when (numberp string)
-    (return-from parse-float string))
-  (list-or-car
-    (let ((*read-eval* nil))
-      (with-input-from-string (stream string)
-        (loop for number = (read stream nil nil)
-              while (and number (numberp number)) collect number)))))
+  (when (numberp str)
+    (return-from parse-float str))
+  (let* ((cleaned (remove-if-not (lambda (c) (or (digit-char-p c) (char= c #\.))) str))
+         (number (read-from-string cleaned nil nil)))
+    (if (numberp number) number nil)))
 
 (defun makima-function (str)
   (symbol-function (intern (string-upcase str) 'makima)))
@@ -68,4 +67,6 @@
   (when (stringp string)
       (string-starts-with string "watcher-")))
 
+(defun hours-to-sec (x)
+  (* x 3600))
 

@@ -12,6 +12,7 @@
            :name
            :target
            :parser
+           :interval
            :handlers
            :records
            :current-value
@@ -52,7 +53,8 @@
            :handler-list
            :last-records-values
            :last-record-value
-           :last-record-timestamp))
+           :last-record-timestamp
+           :status-code))
 
 (in-package :makima.sentry)
 
@@ -68,9 +70,9 @@
    (interval  :col-type integer   :initarg :interval  :accessor interval :initform 60)
    (handlers  :col-type integer[] :initarg :handlers  :accessor handlers)
    (current   :col-type (or string db-null) :initform nil
-                                  :initarg :current   :accessor current-value )
+                                  :initarg :current   :accessor current-value)
    (timestamp :col-type (or string db-null) :initform nil
-                                  :initarg :timestamp :accessor timestamp ))
+                                  :initarg :timestamp :accessor timestamp))
   (:metaclass dao-class)
   (:keys name)
   (:table-name watchers))

@@ -5,7 +5,9 @@
            :more-than
            :more-or-equal-than
            :less-then
-           :less-or-equal-than))
+           :less-or-equal-than
+           :rised-for
+           :dropped-for))
 
 (in-package :makima.predicates)
 
@@ -14,6 +16,15 @@
 
 (defmacro defpred (name args &body body)
   `(defun ,name (watcher ,@args) ,@body))
+
+(defun percent-change (list)
+  (if (>= (length list) 2)
+    (let ((new (car list))
+          (old (carlast list)))
+      (if (zerop old)
+          0
+          (* 100 (/ (- new old) (float old)))))
+    nil))
 
 (defun time-is (&key month day hour min)
   (let ((result t))
@@ -45,3 +56,15 @@
 
 (defpred less-or-equal-than (arg)
   (string-as-float-comparsion <= (current-value watcher) arg))
+
+(defpred rised-for (hours amount)
+  (let* ((count (/ (hours-to-sec hours) (interval watcher)))
+         (values (mapcar #'parse-float (last-records-values watcher count)))
+         (change (percent-change values)))
+    (and change (> change amount))))
+
+(defpred dropped-for (hours amount)
+  (let* ((count (/ (hours-to-sec hours) (interval watcher)))
+         (values (mapcar #'parse-float (last-records-values watcher count)))
+         (change (percent-change values)))
+    (and change (< change amount))))

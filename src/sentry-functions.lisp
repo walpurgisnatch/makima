@@ -14,3 +14,9 @@
 
 (defmethod last-records-values ((watcher watcher) count)
   (mapcar #'value (records watcher :limit count)))
+
+;; parsers
+
+(defun status-code (page)
+  (ss:get-status-code page))
+
