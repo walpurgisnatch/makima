@@ -1,0 +1,59 @@
+(defpackage makima.dashboards
+  (:use :cl :postmodern :makima.utils))
+
+(in-package :makima.dashboards)
+
+(defclass dashboard ()
+  ((id          :col-type integer    :col-identity t       :reader id)
+   (name        :col-type string     :initarg :name        :accessor name)
+   (description :col-type (or string null) :initform nil
+                                     :initarg :description :accessor description))
+  (:metaclass dao-class)
+  (:primary-key id)
+  (:table-name dashboards))
+
+(defclass widget ()
+  ((id        :col-type integer :col-identity t     :reader id)
+   (dashboard :col-type integer :initarg :dashboard :accessor dashboard)
+   (chart     :col-type integer :initarg :chart     :accessor chart)
+   (order     :col-type integer :initarg :order     :accessor order)
+   (width     :col-type integer :initarg :width     :accessor width)
+   (height    :col-type integer :initarg :height    :accessor height)
+   (row       :col-type integer :initarg :row       :accessor row))
+  (:metaclass dao-class)
+  (:primary-key id)
+  (:table-name widgets))
+
+(defclass row ()
+  ((id        :col-type integer :col-identity t     :reader id)
+   (dashboard :col-type integer :initarg :dashboard :accessor dashboard)
+   (title     :col-type integer :initarg :title     :accessor title)
+   (collapsed :col-type boolean :initarg :collapsed :accessor collapsed))
+  (:metaclass dao-class)
+  (:primary-key id)
+  (:table-name rows))
+
+(defmethod print-object ((obj dashboard) stream)
+  (print-unreadable-object (obj stream :type t)
+    (with-accessors ((id id) (name name) (description description)) obj
+      (format stream "~a: ~a | ~a" id name description))))
+
+(defmethod print-object ((obj widget) stream)
+  (print-unreadable-object (obj stream :type t)
+    (with-accessors ((id id) (dashboard dashboard) (order order) (row row)) obj
+      (format stream "~a: in ~a [~a] row: ~a" id dashboard order row))))
+
+(defmethod print-object ((obj row) stream)
+  (print-unreadable-object (obj stream :type t)
+    (with-accessors ((id id) (dashboard dashboard) (title title)) obj
+      (format stream "~a: in ~a | ~a" id dashboard title))))
+
+(defun make-dashboard (&key name description)
+  (make-dao 'dashboard :name name :description description))
+
+(defun make-widget (&key dashboard order width height row)
+  (make-dao 'widget :dashboard dashboard :order order :width width
+                    :height height :row row))
+
+(defun make-row (&key dashboard title)
+  (make-dao 'row :dashboard dashboard :title title))

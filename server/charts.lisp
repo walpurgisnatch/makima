@@ -8,9 +8,10 @@
    (name        :col-type string     :initarg :name        :accessor name)
    (watchers    :col-type string[]   :initarg :watchers    :accessor watchers)
    (type        :col-type string     :initarg :type        :accessor type)
-   (description :col-type (or string db-null) :initform nil
+   (description :col-type (or string null) :initform nil
                                      :initarg :description :accessor description)
    (duration    :col-type string     :initarg :duration    :accessor duration :initform "24h")
+   (refresh     :col-type string     :initarg :refresh     :accessor refresh  :initform "1m")
    (styles      :col-type string     :initarg :styles      :accessor styles))
   (:metaclass dao-class)
   (:keys id)
