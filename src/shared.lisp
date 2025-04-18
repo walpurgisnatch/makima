@@ -8,13 +8,15 @@
            :watchers-updatedp
            :format-time
            :db-credentials
-           :ensure-tables-exists))
+           :ensure-tables-exists
+           :*sentry-store*))
 
 (in-package :makima.shared)
 
 (defparameter *root-folder* "~/.makima")
 (defparameter *vars-file* (merge-with-dir "makima.conf" *root-folder*))
 (defparameter *sentry-file* (merge-with-dir "sentry.lisp" *root-folder*))
+(defparameter *sentry-store* (merge-with-dir "data" *root-folder*))
 (defparameter *data-folder* (merge-with-dir "data/" *root-folder*))
 
 (defparameter *watchers-updated-at*

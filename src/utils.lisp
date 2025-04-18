@@ -19,7 +19,9 @@
 
            :create-table
            :select-last
-           :select-objects-from-array))
+           :select-objects-from-array
+           :time-to-s
+           :timestamp-for-time))
 
 (in-package :makima.utils)
 
@@ -70,3 +72,34 @@
 (defun hours-to-sec (x)
   (* x 3600))
 
+(defun time-to-s (time-str)
+  (let ((total 0)
+        (pos 0)
+        (len (length time-str)))
+    (loop
+      while (< pos len)
+      do
+      (multiple-value-bind (num new-pos)
+          (parse-integer time-str :start pos :junk-allowed t)
+        (when (null num) (return total))
+        
+        (if (< new-pos len)
+            (let ((suffix (char time-str new-pos)))
+              (incf total 
+                    (* num
+                       (case suffix
+                         (#\y 31536000)
+                         (#\w 604800)
+                         (#\d 86400)
+                         (#\h 3600)
+                         (#\m 60)
+                         (#\s 1)
+                         (t 0))))
+              (setf pos (1+ new-pos)))
+            (progn
+              (incf total num)
+              (setf pos new-pos)))))
+    total))
+
+(defun timestamp-for-time (time-str)
+  (- (get-universal-time) (time-to-s time-str)))

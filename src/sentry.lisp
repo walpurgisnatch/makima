@@ -2,6 +2,9 @@
   (:use :cl :postmodern :makima.utils)
   (:import-from :pero
                 :write-log)
+  (:import-from :cl-store
+                :store
+                :restore)
   (:export :*watchers*
            :watcher
            :handler
@@ -54,14 +57,17 @@
            :last-records-values
            :last-record-value
            :last-record-timestamp
-           :status-code))
+           :status-code
+           :store-watchers
+           :restore-watchers))
 
 (in-package :makima.sentry)
 
 (defparameter *watchers* (make-hash-table :test 'equalp))
 
 (defclass watcher ()
-  ((name      :col-type string    :col-unique t
+  ((id        :col-type integer   :col-identity t     :reader id)
+   (name      :col-type string    :col-unique t
                                   :initarg :name      :accessor name)
    (target    :col-type (or string db-null) :initform nil
                                   :initarg :target    :accessor target)
@@ -74,7 +80,7 @@
    (timestamp :col-type (or string db-null) :initform nil
                                   :initarg :timestamp :accessor timestamp))
   (:metaclass dao-class)
-  (:keys name)
+  (:keys id name)
   (:table-name watchers))
 
 (defclass handler ()
@@ -126,8 +132,10 @@
         (make-dao 'record :id 0 :value value :watcher watcher-name
                           :timestamp (get-universal-time)))))
 
-(defmethod records ((watcher watcher) &key limit offset)
+(defmethod records ((watcher watcher) &key limit offset (for "24h"))
   (with-accessors ((watcher-name name)) watcher
+    (let (for-query (:and (:= 'watcher watcher-name)
+                          (:> 'timestamp (timestamp-for-time for))))
     (if limit
         (query-dao 'record
                    (:limit
@@ -136,7 +144,7 @@
                       :where (:= 'watcher watcher-name))
                      (:desc 'id))
                     limit (or offset 0)))
-        (select-dao 'record (:= 'watcher watcher-name)))))
+        (select-dao 'record for-query)))))
 
 (defmethod get-record ((watcher watcher) index)
   (with-accessors ((watcher-name name)) watcher
@@ -242,3 +250,8 @@
 (defun clear-watchers ()
   (setf *watchers* (make-hash-table :test 'equalp)))
 
+(defun store-watchers ()
+  (store watchers *data-file*))
+
+(defun restore-watchers ()
+  (setf *watchers* (restore *data-file*)))

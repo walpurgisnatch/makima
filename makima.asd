@@ -14,7 +14,8 @@
                "clack"
                "ningle"
                "jonathan"
-               "file-attributes")
+               "file-attributes"
+               "cl-store")
   :components ((:module "src"
                 :components
                 ((:file "daemon")
