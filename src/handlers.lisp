@@ -14,6 +14,8 @@
 (defmacro defaction (name args &body body)
   `(defun ,name (watcher ,@args) ,@body))
 
+;; actions
+
 (defaction log-update (name content)
   (write-log :changes name content))
 

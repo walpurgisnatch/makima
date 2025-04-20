@@ -43,10 +43,11 @@
       t)))
 
 (defun read-watchers ()
-  (with-open-file (stream *sentry-file* :if-does-not-exist nil)
-    (loop for expression = (read stream nil)
-          while expression
-          do (eval expression))))
+  (let ((*package* (find-package :makima)))
+    (with-open-file (stream *sentry-file* :if-does-not-exist nil)
+      (loop for expression = (read stream nil)
+            while expression
+            do (eval expression)))))
 
 (defun setting (key)
   (gethash key *settings*))
