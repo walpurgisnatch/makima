@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: makima
+      POSTGRES_PASSWORD: makima
+      POSTGRES_DB: makima
+    ports:
+      - "5433:5433"
+    command: postgres -c port=5433
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U makima -d makima"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "7143:7143"
+    environment:
+      DATABASE_URL: "postgresql://makima:makima@db:5433/makima"
+    volumes:
+      - .:/usr/src/app
+    command: ros /usr/src/app/roswell/makima.ros deamonless
+
+volumes:
+  pg_data:

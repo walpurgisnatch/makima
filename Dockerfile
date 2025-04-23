@@ -21,4 +21,8 @@ WORKDIR /usr/src/app
 
 COPY . .
 
+RUN mkdir -p ~/.config/common-lisp/source-registry.conf.d \
+    && echo "(:tree \"/usr/src/app\")" > \
+    ~/.config/common-lisp/source-registry.conf.d/conf.conf
+
 CMD ["ros", "roswell/makima.ros"]
