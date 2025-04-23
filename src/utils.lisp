@@ -102,4 +102,4 @@
     total))
 
 (defun timestamp-for-time (time-str)
-  (- (get-universal-time) (time-to-s time-str)))
+  (format nil "~a" (- (get-universal-time) (time-to-s time-str))))

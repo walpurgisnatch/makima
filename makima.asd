@@ -1,5 +1,5 @@
 (defsystem "makima"
-  :version "0.6.1"
+  :version "0.6.2"
   :author "Walpurgisnatch"
   :license "MIT"  
   :description "Monitoring system"
@@ -36,6 +36,7 @@
                (:module "server"
                 :components
                 ((:file "server")
+                 (:file "router" :depends-on ("server"))
                  (:file "sentry-controller" :depends-on ("server")))))
   :in-order-to ((test-op (test-op "makima/tests"))))
 

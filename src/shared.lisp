@@ -1,43 +1,59 @@
 (defpackage makima.shared
   (:use :cl :makima.utils)
+  (:import-from :org.shirakumo.file-attributes
+                :modification-time)
   (:export :setting
            :parse-settings
-           :*vars-file*
            :*sentry-file*
+           :*sentry-store*
            :read-watchers
            :watchers-updatedp
            :format-time
            :db-credentials
            :ensure-tables-exists
-           :*sentry-store*))
+           :ensure-files-exists))
 
 (in-package :makima.shared)
 
 (defparameter *root-folder* "~/.makima")
-(defparameter *vars-file* (merge-with-dir "makima.conf" *root-folder*))
+(defparameter *config-file* (merge-with-dir "makima.conf" *root-folder*))
 (defparameter *sentry-file* (merge-with-dir "sentry.lisp" *root-folder*))
-(defparameter *sentry-store* (merge-with-dir "data" *root-folder*))
+(defparameter *sentry-store* (merge-with-dir "sentry.db" *root-folder*))
 (defparameter *data-folder* (merge-with-dir "data/" *root-folder*))
 
+(defparameter *settings* (make-hash-table :test #'equalp))
+
 (defparameter *watchers-updated-at*
-  (org.shirakumo.file-attributes:modification-time #p"~/.makima/sentry.lisp"))
+  (and (probe-file *sentry-file*)
+       (modification-time *sentry-file*)))
 
-(defparameter *settings* nil)
+(defun ensure-file (file)
+  (close (open file :direction :probe :if-does-not-exist :create)))
 
-(defun parse-settings (file)
-  (let ((settings (make-hash-table :test #'equalp)))
-    (with-open-file (stream file)
-      (loop with regexp = nil
-            for line = (read-line stream nil)
-            while line
-            do (setf regexp (nth-value 1 (cl-ppcre:scan-to-strings "(.*)=(.*)" line)))
-            do (sethash (elt regexp 0)
-                        (elt regexp 1)
-                        settings)))
-    (setf *settings* settings)))
+(defun ensure-files-exists ()
+  (unless (probe-file *root-folder*)
+    (mkdir *root-folder*))
+  (ensure-file *config-file*)
+  (ensure-file *sentry-file*)
+  (ensure-file *sentry-store*)
+  (unless (probe-file *data-folder*)
+    (mkdir *data-folder*)))
+
+(defun parse-settings (&optional (file *config-file*))
+  (when (probe-file file)
+    (let ((settings (make-hash-table :test #'equalp)))
+      (with-open-file (stream file)
+        (loop with regexp = nil
+              for line = (read-line stream nil)
+              while line
+              do (setf regexp (nth-value 1 (cl-ppcre:scan-to-strings "(.*)=(.*)" line)))
+              do (sethash (elt regexp 0)
+                          (elt regexp 1)
+                          settings)))
+      (setf *settings* settings))))
 
 (defun watchers-updatedp ()
-  (let ((current (org.shirakumo.file-attributes:modification-time #p"~/.makima/sentry.lisp")))
+  (let ((current (modification-time *sentry-file*)))
     (when (< *watchers-updated-at* current)
       (setf *watchers-updated-at* current)
       t)))
@@ -60,10 +76,12 @@
    :format '((:day 2) "." (:month 2) "." :year " " (:hour 2) ":" (:min 2))))
 
 (defun db-credentials ()
-  (list (setting "db-name")
-        (setting "db-user")
-        (setting "db-pass")
-        (setting "db-host")))
+  (let ((port (setting "db-port")))
+    (list (or (setting "db-name") "makima")
+          (or (setting "db-user") "makima")
+          (or (setting "db-pass") "makima")
+          (or (setting "db-host") "db")
+          :port (or (and port (parse-integer port)) 5433))))
 
 (defun ensure-tables-exists (tables)
   (postmodern:with-connection (db-credentials)

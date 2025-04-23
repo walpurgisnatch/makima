@@ -2,10 +2,11 @@
   (:use :cl
         :makima.utils
         :makima.shared
-        :makima.sentry)
+        :makima.sentry
+        :makima.router)
   (:import-from :postmodern
                 :with-connection)
-  (:import-from :makima.server
+  (:import-from :makima.router
                 :defroute))
 
 (in-package :makima.sentry-controller)
@@ -21,7 +22,7 @@
 
 (defun watcher-data (watcher)
   (object-data watcher (name last-record-value)
-    (length (records watcher))    
+    (length (records watcher))
     (format-time (last-record-timestamp watcher))))
 
 (defun watchers-json ()
@@ -34,22 +35,16 @@
 (defun records-json (watcher &optional limit offset)
   (json-data-of (records watcher :limit limit :offset offset) (id watcher value timestamp) (id watcher value timestamp)))
 
-;;; routes
-(defroute "/watchers"
+;; routes
+(defroute "/watchers" :get ()
   (watchers-json))
 
-(defroute "/:watcher/records"
-  (let ((watcher (cdr (assoc :watcher makima.server:params))))
-    (records-json (get-watcher watcher)
-                  (cdr (assoc "limit" makima.server:params :test #'equal))
-                  (cdr (assoc "offset" makima.server:params :test #'equal)))))
+(defroute "/:watcher/records" :get (watcher (|limit| 50) |offset|)
+  (records-json (get-watcher watcher) |limit| |offset|))
 
 ;; TODO Pack to json works only on lists
-(defroute "/:watcher"
-  (let ((watcher (cdr (assoc :watcher makima.server:params))))
-    (ss:pack-to-json '(name value "recordsCount" parsed) (watcher-data (get-watcher watcher)))))
+(defroute "/:watcher" :get (watcher)
+  (ss:pack-to-json '(name value "recordsCount" parsed) (watcher-data (get-watcher watcher))))
 
-(defroute "/:watcher/last-value"
-  (let ((watcher (cdr (assoc :watcher makima.server:params))))
-    (last-record-value (get-watcher watcher))))
-
+(defroute "/:watcher/last-value" :get (watcher)
+  (last-record-value (get-watcher watcher)))

@@ -12,10 +12,12 @@ exec ros -Q -- $0 "$@"
   (:use :cl))
 (in-package :ros.script.makima.3927534892)
 
-(defun main (&rest argv)
+(defun main (&optional deamonless &rest argv)
   (declare (ignorable argv))
   (handler-case
-      (makima:main #'makima.server:start)
+      (if deamonless
+          (makima:main-deamonless #'makima.server:start)
+          (makima:main #'makima.server:start))
     (error (e)
       (format *standard-output* "~&Error: ~A~%" e)
       (uiop:quit -1))))

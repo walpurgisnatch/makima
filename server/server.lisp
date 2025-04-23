@@ -9,7 +9,8 @@
                 :db-credentials)
   (:export :start
            :stop
-           :params))
+           :params
+           :*app*))
 
 (in-package :makima.server)
 
@@ -17,21 +18,10 @@
 
 (defvar *server* nil)
 
-(defmacro defroute (path &body body)
-  `(setf (ningle:route *app*
-                       ,(concatenate 'string "/api" path))
-         #'(lambda (params)
-             (setf (lack.response:response-headers ningle:*response*)
-                   (append (lack.response:response-headers ningle:*response*)
-                           (list :content-type "application/json")
-                           (list :access-control-allow-origin "*")))
-             (with-connection (db-credentials)
-               ,@body))))
-
-(defun start ()
+(defun start (&key (address "127.0.0.1") (port 7144))
   (if *server*
       (format t "Already running")
-      (setf *server* (clack:clackup *app* :port 7144))))
+      (setf *server* (clack:clackup *app* :address address :port port))))
 
 (defun stop ()
   (if *server*

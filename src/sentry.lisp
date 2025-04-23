@@ -2,6 +2,8 @@
   (:use :cl :postmodern :makima.utils)
   (:import-from :pero
                 :write-log)
+  (:import-from :makima.shared
+                :*sentry-store*)
   (:import-from :cl-store
                 :store
                 :restore)
@@ -132,19 +134,18 @@
         (make-dao 'record :id 0 :value value :watcher watcher-name
                           :timestamp (get-universal-time)))))
 
-(defmethod records ((watcher watcher) &key limit offset (for "24h"))
+(defmethod records ((watcher watcher) &key (limit 50) offset for)
   (with-accessors ((watcher-name name)) watcher
-    (let (for-query (:and (:= 'watcher watcher-name)
-                          (:> 'timestamp (timestamp-for-time for))))
-    (if limit
-        (query-dao 'record
-                   (:limit
-                    (:order-by
-                     (:select '* :from 'records
-                      :where (:= 'watcher watcher-name))
-                     (:desc 'id))
-                    limit (or offset 0)))
-        (select-dao 'record for-query)))))
+      (if for
+          (select-dao 'record (:and (:= 'watcher watcher-name)
+                                    (:> 'timestamp (timestamp-for-time for))))
+          (query-dao 'record
+                     (:limit
+                      (:order-by
+                       (:select '* :from 'records
+                        :where (:= 'watcher watcher-name))
+                       (:desc 'id))
+                      limit (or offset 0))))))
 
 (defmethod get-record ((watcher watcher) index)
   (with-accessors ((watcher-name name)) watcher
@@ -251,7 +252,7 @@
   (setf *watchers* (make-hash-table :test 'equalp)))
 
 (defun store-watchers ()
-  (store watchers *data-file*))
+  (store *watchers* *sentry-store*))
 
 (defun restore-watchers ()
-  (setf *watchers* (restore *data-file*)))
+  (setf *watchers* (restore *sentry-store*)))

@@ -5,7 +5,7 @@
    (handler   :col-type (or integer db-null)
                                  :initarg :handler  :accessor func-handler)
    (name      :col-type string   :initarg :name     :accessor func-name)
-   (args      :col-type string[] :initarg :args     :accessor func-args)
+   (args      :col-type string   :initarg :args     :accessor func-args)
    (persist   :col-type boolean  :initarg :persist  :accessor persist :initform nil))
   (:metaclass dao-class))
 
