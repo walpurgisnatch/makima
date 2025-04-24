@@ -25,7 +25,7 @@
   (ensure-files-exists)
   (parse-settings)
   (ensure-tables-exists '(watcher html-watcher handler predicate action record))
-  (read-watchers))
+  (restore-watchers))
 
 (setup)
 

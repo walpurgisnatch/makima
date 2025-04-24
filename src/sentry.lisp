@@ -243,7 +243,8 @@
                               :interval interval :handlers handlers)))
 
 (defmethod save-watcher ((watcher watcher))
-  (sethash (name watcher) watcher *watchers*))
+  (sethash (name watcher) watcher *watchers*)
+  (store-watchers))
 
 (defun get-watcher (name)
   (gethash name *watchers*))
@@ -255,4 +256,8 @@
   (store *watchers* *sentry-store*))
 
 (defun restore-watchers ()
-  (setf *watchers* (restore *sentry-store*)))
+  (handler-case
+      (when (probe-file *sentry-store*)
+        (setf *watchers* (restore *sentry-store*)))
+    (error (e)
+      (format *standard-output* "~&Error: ~A~%" e))))

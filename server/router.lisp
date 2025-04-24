@@ -36,6 +36,9 @@
                            (list :access-control-allow-origin "*")))
              (destructuring-bind (&key ,@args)
                  ,(params-form params args)
-               (with-connection (db-credentials)
-                 ,@body))))))
+               (handler-case
+                   (with-connection (db-credentials)
+                     ,@body)
+                 (error (e)
+                   (format *standard-output* "~&Error: ~A~%" e))))))))
 

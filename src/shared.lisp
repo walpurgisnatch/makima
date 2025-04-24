@@ -68,7 +68,8 @@
 (defun setting (key)
   (gethash key *settings*))
 
-(defun format-time  (timestamp)
+(defun format-time (timestamp)
+  (when (null timestamp) (return-from format-time nil))
   (when (stringp timestamp) (setf timestamp (parse-integer timestamp)))
   (local-time:format-timestring
    nil

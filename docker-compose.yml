@@ -26,7 +26,7 @@ services:
       DATABASE_URL: "postgresql://makima:makima@db:5433/makima"
     volumes:
       - .:/usr/src/app
-    command: ros /usr/src/app/roswell/makima.ros deamonless
+    command: ros /usr/src/app/roswell/makima.ros deamonless seed
 
 volumes:
   pg_data:
