@@ -39,12 +39,16 @@
 (defroute "/watchers" :get ()
   (watchers-json))
 
+(defroute "/watchers" :post (|type| |name| |target| |parser| |interval| |handlers| |page|)
+  (format t "~a ~a ~a ~a ~a ~a" |type| |name| |target| |parser| |interval| |handlers|))
+
 (defroute "/:watcher/records" :get (watcher (|limit| 50) |offset|)
   (records-json (get-watcher watcher) |limit| |offset|))
 
 ;; TODO Pack to json works only on lists
 (defroute "/:watcher" :get (watcher)
-  (ss:pack-to-json '(name value "recordsCount" parsed) (watcher-data (get-watcher watcher))))
+  (ss:pack-to-json '(name value "recordsCount" parsed)
+                   (list (watcher-data (get-watcher watcher)))))
 
 (defroute "/:watcher/last-value" :get (watcher)
   (last-record-value (get-watcher watcher)))
