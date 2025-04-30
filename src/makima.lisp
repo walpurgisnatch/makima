@@ -24,7 +24,7 @@
 (defun setup ()
   (ensure-files-exists)
   (parse-settings)
-  (ensure-tables-exists '(watcher html-watcher handler predicate action record))
+  (ensure-tables-exists '(record))
   (restore-watchers))
 
 (setup)

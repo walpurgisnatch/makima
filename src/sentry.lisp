@@ -61,7 +61,9 @@
            :last-record-timestamp
            :status-code
            :store-watchers
-           :restore-watchers))
+           :restore-watchers
+           :delete-watcher
+           :records-count))
 
 (in-package :makima.sentry)
 
@@ -110,8 +112,8 @@
 
 (defmethod print-object ((obj watcher) stream)
   (print-unreadable-object (obj stream :type t)
-    (with-accessors ((name name) (value current-value) (records records)) obj
-      (format stream "~a: ~a, parsed: ~a | ~a records " name value (last-record-timestamp obj) (length records)))))
+    (with-accessors ((name name) (value current-value) (parser parser) (handlers handlers) (records records)) obj
+      (format stream "~a: ~a, parser: ~a handlers: ~a | ~a records " name value parser handlers (length records)))))
 
 (defmethod print-object ((obj handler) stream)
   (print-unreadable-object (obj stream :type t)
@@ -244,6 +246,10 @@
 
 (defmethod save-watcher ((watcher watcher))
   (sethash (name watcher) watcher *watchers*)
+    (store-watchers))
+
+(defmethod delete-watcher (watcher)
+  (remhash watcher *watchers*)
   (store-watchers))
 
 (defun get-watcher (name)

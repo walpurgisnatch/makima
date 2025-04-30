@@ -15,6 +15,11 @@
 (defmethod last-records-values ((watcher watcher) count)
   (mapcar #'value (records watcher :limit count)))
 
+(defmethod records-count ((watcher watcher))
+  (with-accessors ((watcher-name name)) watcher
+    (query (:select (:count '*) :from 'records
+            :where (:= 'watcher watcher-name)) :single)))
+
 ;; parsers
 
 (defun status-code (page)

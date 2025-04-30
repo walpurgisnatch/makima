@@ -1,12 +1,13 @@
 (defpackage makima.dashboards
-  (:use :cl :postmodern :makima.utils))
+  (:use :cl :postmodern :makima.utils
+   :makima.shared :makima.router :makima.charts))
 
 (in-package :makima.dashboards)
 
 (defclass dashboard ()
   ((id          :col-type integer    :col-identity t       :reader id)
    (name        :col-type string     :initarg :name        :accessor name)
-   (description :col-type (or string null) :initform nil
+   (description :col-type (or string db-null) :initform nil
                                      :initarg :description :accessor description))
   (:metaclass dao-class)
   (:primary-key id)
@@ -33,6 +34,8 @@
   (:primary-key id)
   (:table-name rows))
 
+(ensure-tables-exists '(dashboard row widget chart))
+
 (defmethod print-object ((obj dashboard) stream)
   (print-unreadable-object (obj stream :type t)
     (with-accessors ((id id) (name name) (description description)) obj
@@ -57,3 +60,19 @@
 
 (defun make-row (&key dashboard title)
   (make-dao 'row :dashboard dashboard :title title))
+
+(defroute "/dashboards" :get ()
+  (ss:pack-to-json '(name description)
+     (loop for d in (select-dao 'dashboard)
+           collect (object-data d (name description)))))
+
+(defroute "/dashboards" :post (|name| |description|)
+  (make-dashboard :name |name| :description |description|))
+
+(defroute "/dashboards/:dashboard/widgets" :get (dashboard)
+  (select-dao 'widgets))
+
+(defroute "/widgets" :post (|dashboard| |chart| |order| |width| |height| |row|)
+  (make-widget :dashboard |dashboard| :chart |chart| :order |order|
+               :width |width| :height |height| :row |row|))
+

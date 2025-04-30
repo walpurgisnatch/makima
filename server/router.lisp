@@ -10,16 +10,16 @@
 
 (in-package :makima.router)
 
-(defun params-form (params-symb lambda-list)
+(defun params-form (params args)
   (let ((pair (gensym "PAIR")))
     `(nconc
-      ,@(loop for arg in lambda-list
+      ,@(loop for arg in args
               collect
               (destructuring-bind (arg &optional default specified)
                   (if (consp arg) arg (list arg))
                 (declare (ignore default specified))
                 `(let ((,pair (assoc ,(symbol-name arg)
-                                     ,params-symb
+                                     ,params
                                      :test #'string=)))
                    (if ,pair
                        (list ,(intern (symbol-name arg) :keyword) (cdr ,pair))

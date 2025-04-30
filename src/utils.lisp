@@ -21,9 +21,17 @@
            :select-last
            :select-objects-from-array
            :time-to-s
-           :timestamp-for-time))
+           :timestamp-for-time
+           :object-data
+           :get-json))
 
 (in-package :makima.utils)
+
+(defmacro object-data (obj slots &body body)
+  `(with-accessors ,(loop for slot in slots
+                          collect (list slot slot))
+       ,obj
+     (list ,@slots ,@body)))
 
 (defmacro list-or-car (&body body)
   `(let ((data ,@body))
@@ -103,3 +111,7 @@
 
 (defun timestamp-for-time (time-str)
   (format nil "~a" (- (get-universal-time) (time-to-s time-str))))
+
+(defun get-json (keys list)
+  ;;TODO
+  (+ 1 1))

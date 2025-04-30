@@ -1,14 +1,15 @@
 (defpackage makima.charts
-  (:use :cl :postmodern :makima.utils))
+  (:use :cl :postmodern :makima.utils :makima.router)
+  (:export :chart))
 
 (in-package :makima.charts)
 
 (defclass chart ()
   ((id          :col-type integer    :col-identity t       :reader id)
    (name        :col-type string     :initarg :name        :accessor name)
-   (watchers    :col-type string[]   :initarg :watchers    :accessor watchers)
-   (type        :col-type string     :initarg :type        :accessor type)
-   (description :col-type (or string null) :initform nil
+   (watchers    :col-type integer[]  :initarg :watchers    :accessor watchers)
+   (chart-type  :col-type string     :initarg :type        :accessor chart-type)
+   (description :col-type (or string db-null) :initform nil
                                      :initarg :description :accessor description)
    (duration    :col-type string     :initarg :duration    :accessor duration :initform "24h")
    (refresh     :col-type string     :initarg :refresh     :accessor refresh  :initform "1m")
@@ -26,3 +27,5 @@
   (make-dao 'chart :name name :watchers watchers :type type :description description
                    :duration duration :styles styles))
 
+(defun get-chart (id)
+  (get-dao 'chart id))
