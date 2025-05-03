@@ -20,7 +20,7 @@
 (defroute "/watchers" :post (|type| |name| |target| |parser| |interval| |handlers| |page| |url|)
   (let* ((parser `(:parser ,(makima-function |parser|)))
          (handlers `(:handlers ,(create-handlers |handlers|)))
-         (default `(:name ,|name| :target ,|target| :interval ,|interval|))
+         (default `(:name ,|name| :target ,|target| :interval ,(parse-integer |interval|)))
          (args (append default parser handlers))
          (result nil))
     (setf result
@@ -28,7 +28,7 @@
             ("common" (apply #'create-watcher args))
             ("html" (apply #'create-html-watcher (append args `(:page ,|page|))))
             ("api" (apply #'create-html-watcher (append args `(:url ,|url|))))))
-    result))
+    "ok"))
 
 ;; TODO Pack to json works only on lists
 (defroute "/watchers/:watcher" :get (watcher)
@@ -36,7 +36,8 @@
                    (list (watcher-data (get-watcher watcher)))))
 
 (defroute "/watchers/:watcher" :delete (watcher)
-  (delete-watcher watcher))
+  (delete-watcher watcher)
+  "ok")
 
 (defroute "/watchers/:watcher/records" :get (watcher (|limit| 50) |offset|)
   (records-json (get-watcher watcher) |limit| |offset|))
