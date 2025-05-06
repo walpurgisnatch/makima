@@ -6,7 +6,7 @@
 
 (defclass dashboard ()
   ((id          :col-type integer    :col-identity t       :reader id)
-   (name        :col-type string     :initarg :name        :accessor name)
+   (name        :col-type string     :initarg :name        :accessor name  :unique t)
    (description :col-type (or string db-null) :initform nil
                                      :initarg :description :accessor description))
   (:metaclass dao-class)
@@ -62,12 +62,35 @@
   (make-dao 'row :dashboard dashboard :title title))
 
 (defroute "/dashboards" :get ()
-  (ss:pack-to-json '(name description)
+  (ss:pack-to-json '(id name description)
      (loop for d in (select-dao 'dashboard)
-           collect (object-data d (name description)))))
+           collect (object-data d (id name description)))))
 
 (defroute "/dashboards" :post (|name| |description|)
-  (make-dashboard :name |name| :description |description|))
+  (make-dashboard :name |name| :description |description|)
+  "ok")
+
+(defroute "/dashboards/:dashboard" :get (dashboard)
+  (ss:pack-to-json '(name description)
+                   (list (object-data
+                             (select-dao 'dashboards (:= 'name dashboard))
+                             (name description)))))
+
+(defroute "/dashboards/:dashboard" :put (dashboard |name| |description|)
+  (let ((dashboard-dao (car (select-dao 'dashboard (:= 'name dashboard)))))
+    (when dashboard-dao
+      (with-slots (name description) dashboard-dao
+        (setf name |name|
+              description |description|)
+        (update-dao dashboard-dao))))
+  "ok")
+
+(defroute "/dashboards/:dashboard" :delete (dashboard)
+  (let ((dashboard (car (select-dao 'dashboard (:= 'name dashboard)))))
+    (when dashboard
+      (delete-dao dashboard)))
+  "ok")
+
 
 (defroute "/dashboards/:dashboard/widgets" :get (dashboard)
   (select-dao 'widgets))
