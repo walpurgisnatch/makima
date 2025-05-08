@@ -4,9 +4,10 @@
         :makima.shared
         :makima.heart
         :makima.sentry
+        :makima.parsers
         :makima.html-watcher
         :makima.predicates
-        :makima.handlers)
+        :makima.actions)
   (:import-from :postmodern
                 :execute
                 :query

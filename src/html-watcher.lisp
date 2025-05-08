@@ -4,12 +4,12 @@
         :makima.utils
         :makima.shared
         :makima.predicates
-        :makima.sentry)
+        :makima.sentry
+        :makima.parsers)
   (:export :html-watcher
            :page
            :create-html-watcher
-           :dao-create-html-watcher
-           :parse-content))
+           :dao-create-html-watcher))
 
 (in-package :makima.html-watcher)
 
@@ -44,7 +44,4 @@
                  (funcall parse target))
                 ((and page target)
                  (parse-content page target))))))
-
-(defun parse-content (page target)
-  (ss:parse-text page target))
 

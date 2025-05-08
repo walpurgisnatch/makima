@@ -3,6 +3,7 @@
         :makima.utils
         :makima.shared
         :makima.sentry
+        :makima.parsers
         :makima.html-watcher
         :makima.dao-parser
         :makima/tests/server

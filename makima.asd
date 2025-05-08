@@ -26,8 +26,9 @@
                  (:file "sentry" :depends-on ("shared"));
                  (:file "sentry-dao" :depends-on ("sentry"))
                  (:file "sentry-functions" :depends-on ("sentry"))
+                 (:file "parsers" :depends-on ("sentry-functions"))
                  (:file "predicates" :depends-on ("sentry-functions"))
-                 (:file "handlers" :depends-on ("sentry-functions"))
+                 (:file "actions" :depends-on ("sentry-functions"))
                  (:file "html-watcher" :depends-on ("sentry"))
                  (:file "api-watcher" :depends-on ("sentry"))
                  (:file "dao-parser" :depends-on ("html-watcher" "api-watcher"))

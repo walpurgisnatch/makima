@@ -13,7 +13,18 @@
 
 (in-package :makima.sentry-controller)
 
+
 ;; routes
+(defroute "/watcher-actions" :get ()
+  (ss:pack-to-json '(type name args doc) makima.actions:*actions-list*))
+
+(defroute "/watcher-predicates" :get ()
+  (ss:pack-to-json '(type name args doc) makima.predicates:*predicates-list*))
+
+(defroute "/watcher-parsers" :get ((|type| "general"))
+  (ss:pack-to-json '(type name args doc)
+                   (remove-if-not #'(lambda (parser) (string= |type| (car parser))) makima.parsers:*parsers-list*)))
+
 (defroute "/watchers" :get ()
   (watchers-json))
 

@@ -91,7 +91,6 @@
       (delete-dao dashboard)))
   "ok")
 
-
 (defroute "/dashboards/:dashboard/widgets" :get (dashboard)
   (select-dao 'widgets))
 

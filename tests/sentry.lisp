@@ -5,7 +5,7 @@
         :makima.utils
         :makima.sentry
         :makima.predicates
-        :makima.handlers
+        :makima.actions
         :makima/tests/main
         :fiveam)
   (:export :sentry))
@@ -41,8 +41,8 @@
            :handlers (handler-list
                       (:recordp t)
                       (:predicate `(in-content "100") :actions '((write-line-to "~/.makima-out" "watcher-current-value")) :once t)
-                      (:predicate '(pump-for 1 20) :actions '((write-line-to "~/.makima-out" "pumped")))
-                      (:predicate '(fall-for 1 -10) :actions '((write-line-to "~/.makima-out" "falled"))))))))
+                      (:predicate '(rised-for 1 20) :actions '((write-line-to "~/.makima-out" "pumped")))
+                      (:predicate '(dropped-for 1 -10) :actions '((write-line-to "~/.makima-out" "falled"))))))))
 
 (test report-test
   (with-connection '("makimatest" "makima" "makima" "localhost")

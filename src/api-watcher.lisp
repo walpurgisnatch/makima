@@ -2,13 +2,13 @@
   (:use :cl
         :postmodern
         :makima.utils
+        :makima.sentry
         :makima.predicates
-        :makima.sentry)
+        :makima.parsers)
   (:export :api-watcher
            :url
            :create-api-watcher
-           :dao-create-api-watcher
-           :parse-data))
+           :dao-create-api-watcher))
 
 (in-package :makima.api-watcher)
 
@@ -43,7 +43,6 @@
                 ((and parse target)
                  (funcall parse target))
                 ((and url target)
-                 (parse-data url target))))))
+                 (parse-key-value url target))))))
 
-(defun parse-data (url target)
-  (ss:jfinder (ss:safe-get url) target))
+

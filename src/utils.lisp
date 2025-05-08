@@ -89,8 +89,7 @@
       do
       (multiple-value-bind (num new-pos)
           (parse-integer time-str :start pos :junk-allowed t)
-        (when (null num) (return total))
-        
+        (when (null num) (return total))        
         (if (< new-pos len)
             (let ((suffix (char time-str new-pos)))
               (incf total 
