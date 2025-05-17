@@ -23,7 +23,8 @@
 
 (defroute "/watcher-parsers" :get ((|type| "general"))
   (ss:pack-to-json '(type name args doc)
-                   (remove-if-not #'(lambda (parser) (string= |type| (car parser))) makima.parsers:*parsers-list*)))
+                   (remove-if-not #'(lambda (parser) (string= |type| (car parser)))
+                                  makima.parsers:*parsers-list*)))
 
 (defroute "/watchers" :get ()
   (watchers-json))
@@ -36,7 +37,7 @@
          (result nil))
     (setf result
           (Alexandria:switch (|type| :test #'string=)
-            ("common" (apply #'create-watcher args))
+            ("general" (apply #'create-watcher args))
             ("html" (apply #'create-html-watcher (append args `(:page ,|page|))))
             ("api" (apply #'create-html-watcher (append args `(:url ,|url|))))))
     "ok"))
@@ -83,4 +84,17 @@
 
 (defun create-handlers (list)
   (loop for handler in list
-        collect (apply #'make-handler (read-from-string handler))))
+        collect (make-handler :recordp (arg handler "recordp")
+                              :once (arg handler "once")
+                              :predicate (prepare-predicate (arg handler "predicate"))
+                              :actions (prepare-actions (arg handler "actions")))))
+
+(defun arg (list key)
+  (cdr (find key list :key #'car :test #'string=)))
+
+(defun prepare-predicate (predicate)
+  (read-from-string (format nil "(~a)" predicate)))
+
+(defun prepare-actions (actions)
+  (read-from-string (format nil "(~{(~a)~})" actions)))
+

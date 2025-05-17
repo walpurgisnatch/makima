@@ -20,8 +20,3 @@
     (query (:select (:count '*) :from 'records
             :where (:= 'watcher watcher-name)) :single)))
 
-;; parsers
-
-(defun status-code (page)
-  (ss:get-status-code page))
-

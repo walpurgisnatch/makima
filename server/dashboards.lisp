@@ -19,20 +19,10 @@
    (chart     :col-type integer :initarg :chart     :accessor chart)
    (order     :col-type integer :initarg :order     :accessor order)
    (width     :col-type integer :initarg :width     :accessor width)
-   (height    :col-type integer :initarg :height    :accessor height)
-   (row       :col-type integer :initarg :row       :accessor row))
+   (height    :col-type integer :initarg :height    :accessor height))
   (:metaclass dao-class)
   (:primary-key id)
   (:table-name widgets))
-
-(defclass row ()
-  ((id        :col-type integer :col-identity t     :reader id)
-   (dashboard :col-type integer :initarg :dashboard :accessor dashboard)
-   (title     :col-type integer :initarg :title     :accessor title)
-   (collapsed :col-type boolean :initarg :collapsed :accessor collapsed))
-  (:metaclass dao-class)
-  (:primary-key id)
-  (:table-name rows))
 
 (ensure-tables-exists '(dashboard row widget chart))
 
@@ -46,20 +36,12 @@
     (with-accessors ((id id) (dashboard dashboard) (order order) (row row)) obj
       (format stream "~a: in ~a [~a] row: ~a" id dashboard order row))))
 
-(defmethod print-object ((obj row) stream)
-  (print-unreadable-object (obj stream :type t)
-    (with-accessors ((id id) (dashboard dashboard) (title title)) obj
-      (format stream "~a: in ~a | ~a" id dashboard title))))
-
 (defun make-dashboard (&key name description)
   (make-dao 'dashboard :name name :description description))
 
 (defun make-widget (&key dashboard order width height row)
   (make-dao 'widget :dashboard dashboard :order order :width width
-                    :height height :row row))
-
-(defun make-row (&key dashboard title)
-  (make-dao 'row :dashboard dashboard :title title))
+                    :height height))
 
 (defroute "/dashboards" :get ()
   (ss:pack-to-json '(id name description)
@@ -72,9 +54,9 @@
 
 (defroute "/dashboards/:dashboard" :get (dashboard)
   (ss:pack-to-json '(name description)
-                   (list (object-data
-                             (select-dao 'dashboards (:= 'name dashboard))
-                             (name description)))))
+                   (object-data
+                       (car (select-dao 'dashboard (:= 'name dashboard)))
+                       (name description))))
 
 (defroute "/dashboards/:dashboard" :put (dashboard |name| |description|)
   (let ((dashboard-dao (car (select-dao 'dashboard (:= 'name dashboard)))))
@@ -94,7 +76,7 @@
 (defroute "/dashboards/:dashboard/widgets" :get (dashboard)
   (select-dao 'widgets))
 
-(defroute "/widgets" :post (|dashboard| |chart| |order| |width| |height| |row|)
+(defroute "/widgets" :post (|dashboard| |chart| |order| |width| |height|)
   (make-widget :dashboard |dashboard| :chart |chart| :order |order|
-               :width |width| :height |height| :row |row|))
+               :width |width| :height |height|))
 

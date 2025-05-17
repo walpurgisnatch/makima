@@ -3,7 +3,8 @@
   (:export :*parsers-list*
            :parse-content
            :parse-key-value
-           :return-target-number))
+           :return-target-number
+           :status-code))
 
 (in-package :makima.parsers)
 
@@ -26,3 +27,6 @@
     "Заглушка"
   (parse-integer target))
 
+(defparser status-code (page) "general"
+    "Page status code"
+  (ss:get-status-code page))
