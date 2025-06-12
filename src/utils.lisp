@@ -23,7 +23,8 @@
            :time-to-s
            :timestamp-for-time
            :object-data
-           :get-json))
+           :get-json
+           :arg))
 
 (in-package :makima.utils)
 
@@ -38,6 +39,9 @@
      (if (cdr data)
          data
          (car data))))
+
+(defun arg (list key)
+  (cdr (find key list :key #'car :test #'string=)))
 
 (defun carlast (x)
   (car (last x)))

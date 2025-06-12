@@ -19,7 +19,7 @@
 
 (defvar *server* nil)
 
-(defun run-dev (&key (address "127.0.0.1") (port 7144))
+(defun run-dev (&key (address "127.0.0.1") (port 7143))
   (start :address address :port port)
   (makima:main-deamonless))
 

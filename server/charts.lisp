@@ -1,6 +1,8 @@
 (defpackage makima.charts
   (:use :cl :postmodern :makima.utils :makima.router)
-  (:export :chart))
+  (:export :chart           
+           :get-chart
+           :make-chart))
 
 (in-package :makima.charts)
 
@@ -23,9 +25,10 @@
     (with-accessors ((id id) (name name) (watchers watchers) (type type)) obj
       (format stream "~a: [~a] ~a | ~a" id name watchers type))))
 
-(defun make-chart (&key name watchers type description duration styles)
+(defun make-chart (&key name watchers type description duration refresh styles)
   (make-dao 'chart :name name :watchers watchers :type type :description description
-                   :duration duration :styles styles))
+                   :duration duration :refresh refresh :styles styles))
 
 (defun get-chart (id)
   (get-dao 'chart id))
+

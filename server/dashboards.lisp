@@ -1,6 +1,10 @@
 (defpackage makima.dashboards
-  (:use :cl :postmodern :makima.utils
-   :makima.shared :makima.router :makima.charts))
+  (:use :cl
+        :postmodern
+        :makima.utils
+        :makima.shared
+        :makima.router
+        :makima.charts))
 
 (in-package :makima.dashboards)
 
@@ -15,7 +19,7 @@
 
 (defclass widget ()
   ((id        :col-type integer :col-identity t     :reader id)
-   (dashboard :col-type integer :initarg :dashboard :accessor dashboard)
+   (dashboard :col-type string  :initarg :dashboard :accessor dashboard)
    (chart     :col-type integer :initarg :chart     :accessor chart)
    (order     :col-type integer :initarg :order     :accessor order)
    (width     :col-type integer :initarg :width     :accessor width)
@@ -24,24 +28,7 @@
   (:primary-key id)
   (:table-name widgets))
 
-(ensure-tables-exists '(dashboard row widget chart))
-
-(defmethod print-object ((obj dashboard) stream)
-  (print-unreadable-object (obj stream :type t)
-    (with-accessors ((id id) (name name) (description description)) obj
-      (format stream "~a: ~a | ~a" id name description))))
-
-(defmethod print-object ((obj widget) stream)
-  (print-unreadable-object (obj stream :type t)
-    (with-accessors ((id id) (dashboard dashboard) (order order) (row row)) obj
-      (format stream "~a: in ~a [~a] row: ~a" id dashboard order row))))
-
-(defun make-dashboard (&key name description)
-  (make-dao 'dashboard :name name :description description))
-
-(defun make-widget (&key dashboard order width height row)
-  (make-dao 'widget :dashboard dashboard :order order :width width
-                    :height height))
+(ensure-tables-exists '(dashboard widget chart))
 
 (defroute "/dashboards" :get ()
   (ss:pack-to-json '(id name description)
@@ -74,9 +61,39 @@
   "ok")
 
 (defroute "/dashboards/:dashboard/widgets" :get (dashboard)
-  (select-dao 'widgets))
+  (ss:pack-to-json '(id order width height chart-id chart)
+     (loop for widget in (select-dao 'widget (:= 'dashboard dashboard))
+           collect (object-data widget
+                                (id order width height chart)
+                                (get-chart chart)))))
 
 (defroute "/widgets" :post (|dashboard| |chart| |order| |width| |height|)
   (make-widget :dashboard |dashboard| :chart |chart| :order |order|
                :width |width| :height |height|))
+
+;; utils
+
+(defmethod print-object ((obj dashboard) stream)
+  (print-unreadable-object (obj stream :type t)
+    (with-accessors ((id id) (name name) (description description)) obj
+      (format stream "~a: ~a | ~a" id name description))))
+
+(defmethod print-object ((obj widget) stream)
+  (print-unreadable-object (obj stream :type t)
+    (with-accessors ((id id) (dashboard dashboard) (order order) (row row)) obj
+      (format stream "~a: in ~a [~a] row: ~a" id dashboard order row))))
+
+(defun make-dashboard (&key name description)
+  (make-dao 'dashboard :name name :description description))
+
+(defun make-widget (&key dashboard order width height row chart)
+  (let ((chart (make-chart :name (arg chart "name")
+                           :watchers (arg chart "watchers")
+                           :type (arg chart "type")
+                           :description (arg chart "description")
+                           :duration (arg chart "duration")
+                           :refresh (arg chart "refresh")
+                           :styles (arg chart "styles"))))
+    (make-dao 'widget :dashboard dashboard :order order :width width
+                      :height height :chart (id chart))))
 

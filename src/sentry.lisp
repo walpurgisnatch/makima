@@ -245,8 +245,7 @@
                               :interval interval :handlers handlers)))
 
 (defmethod save-watcher ((watcher watcher))
-  (prog1
-      (sethash (name watcher) watcher *watchers*)
+  (prog1 (sethash (name watcher) watcher *watchers*)
     (store-watchers)))
 
 (defmethod delete-watcher (watcher)

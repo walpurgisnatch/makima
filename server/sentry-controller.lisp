@@ -58,11 +58,6 @@
   (last-record-value (get-watcher watcher)))
 
 ;; utils
-(defmacro object-data (obj slots &body body)
-  `(with-accessors ,(loop for slot in slots
-                          collect (list slot slot))
-       ,obj
-     (list ,@slots ,@body)))
 
 (defmacro json-data-of (objl keys vals &body body)
   `(ss:pack-to-json ',keys (mapcar #'(lambda (obj) (object-data obj ,vals ,@body)) ,objl)))
@@ -88,9 +83,6 @@
                               :once (arg handler "once")
                               :predicate (prepare-predicate (arg handler "predicate"))
                               :actions (prepare-actions (arg handler "actions")))))
-
-(defun arg (list key)
-  (cdr (find key list :key #'car :test #'string=)))
 
 (defun prepare-predicate (predicate)
   (read-from-string (format nil "(~a)" predicate)))
