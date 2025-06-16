@@ -23,16 +23,26 @@
            :time-to-s
            :timestamp-for-time
            :object-data
+           :json-data-of
            :get-json
-           :arg))
+           :arg
+           :object-to-plist))
 
 (in-package :makima.utils)
+
+(defun object-to-plist (obj slot-names)
+  (loop for slot-name in slot-names
+        append (list (intern (string-downcase (string slot-name)) :keyword)
+                     (slot-value obj slot-name))))
 
 (defmacro object-data (obj slots &body body)
   `(with-accessors ,(loop for slot in slots
                           collect (list slot slot))
        ,obj
      (list ,@slots ,@body)))
+
+(defmacro json-data-of (objl keys vals &body body)
+  `(ss:pack-to-json ',keys (mapcar #'(lambda (obj) (object-data obj ,vals ,@body)) ,objl)))
 
 (defmacro list-or-car (&body body)
   `(let ((data ,@body))

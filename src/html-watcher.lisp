@@ -21,8 +21,8 @@
 
 (defmethod print-object ((obj html-watcher) stream)
   (print-unreadable-object (obj stream :type t)
-    (with-accessors ((name name) (value current-value) (records records)) obj
-      (format stream "~a: ~a, parsed: ~a | ~a records " name value (format-time (last-record-timestamp obj)) (length records)))))
+    (with-accessors ((name name) (page page) (target target) (parser parser) (value current-value) (records records)) obj
+      (format stream "~a: ~a, parser: ~a, page: ~a, target: ~a | ~a records " name value parser page target (length records)))))
 
 (defun create-html-watcher (&key name target parser (interval 60) handlers page)
   (save-watcher
