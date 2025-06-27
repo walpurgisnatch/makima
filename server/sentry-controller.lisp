@@ -75,7 +75,9 @@
     (ss:pack-to-json '(name value target interval "recordsCount" parsed) result)))
 
 (defun records-json (watcher &optional limit offset)
-  (json-data-of (records watcher :limit limit :offset offset) (id watcher value timestamp) (id watcher value timestamp)))
+  (json-data-of (records watcher :limit limit :offset offset)
+      (id watcher value timestamp)
+      (id watcher value timestamp)))
 
 (defun create-handlers (list)
   (loop for handler in list

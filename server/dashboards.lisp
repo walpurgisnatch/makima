@@ -43,8 +43,7 @@
 (defroute "/dashboards/:dashboard" :get (dashboard)
   (let ((dashboard-obj (car (select-dao 'dashboard (:= 'name dashboard)))))
          (jonathan:to-json (list :|name| (name dashboard-obj)
-                                 :|description| (description dashboard-obj)
-                                 :|widgets| (select-widgets dashboard)))))
+                                 :|description| (description dashboard-obj)))))
 
 (defroute "/dashboards/:dashboard" :put (dashboard |name| |description|)
   (let ((dashboard-dao (car (select-dao 'dashboard (:= 'name dashboard)))))
@@ -64,18 +63,60 @@
 (defroute "/dashboards/:dashboard/widgets" :get (dashboard)
   (jonathan:to-json (select-widgets dashboard)))
 
-(defroute "/widgets" :post (|dashboard| |widgetType| |chartType| |name| |watchers|
-                            |description| |duration| |refresh| |styles|)
+(defroute "/widgets/:widget" :get (widget)
+  (jonathan:to-json (widget-data (get-widget widget))))
+
+(defroute "/widgets" :post
+    (|dashboard| |widgetType| |chartType| |name| |watchers|
+                 |description| |duration| |refresh| |styles|)
   (make-widget :dashboard |dashboard| :widget-type |widgetType| :width 450 :height 450
                :chart-type |chartType| :name |name| :watchers |watchers| :styles |styles|
                :description |description| :duration |duration| :refresh |refresh|)
   "ok")
 
-(defroute "/widgets/:widget/data" :get (widget) 
-  (get-chart-data widget))
+(defroute "/widgets/:widget" :put
+    (widget |widgetType| |chartType| |name| |watchers| |description|
+            |duration| |refresh| |styles|)
+  (let* ((widget (get-widget widget))
+         (chart (chart widget)))
+    (when (and widget chart)
+      (update-chart chart :name |name| :watchers |watchers| :type |chartType|
+                          :description |description| :duration |duration|
+                          :refresh |refresh| :styles |styles|)
+      (with-slots (widget-type) widget
+        (setf widget-type |widgetType|)
+        (update-dao widget))))
+  "ok")
 
-(defroute "/widgets/data" :post (|watchers|)
-  (get-watchers-records |watchers|))
+(defroute "/widgets/:widget" :delete (widget)
+  (let* ((widget (get-dao 'widget widget))
+         (widgets (select-dao 'widget (:= 'dashboard (dashboard widget)))))
+    (when widget
+      (delete-dao (get-chart (chart widget)))
+      (delete-dao widget))
+    (loop for w in widgets
+          for i from 0 to (length widgets)
+          do (setf (order w) i)
+          do (update-dao w)))
+  "ok")
+
+(defroute "/widgets/:widget/size" :post (widget |width| |height|)
+  (update-widget-size widget |width| |height|)
+  "ok")
+
+(defroute "/charts/:chart/data" :get (chart)
+  (get-chart-data chart))
+
+(defroute "/widgets/data" :post (|watchers| |duration|)
+  (get-watchers-records |watchers| |duration|))
+
+(defroute "/widgets/order" :post (|widgets|)
+  (loop for order-data in |widgets|
+        with widget = nil
+        do (setf widget (get-widget (a-value "id" order-data)))
+        do (setf (order widget) (a-value "order" order-data))
+        do (update-dao widget))
+  "ok")
 
 ;; utils
 
@@ -105,14 +146,35 @@
     (make-dao 'widget :dashboard dashboard :order order :width width
                       :height height :widget-type widget-type :chart chart)))
 
+(defun get-widget (id)
+  (get-dao 'widget id))
+
 (defun calc-order (dashboard)
   (length (select-dao 'widget (:= 'dashboard dashboard))))
 
 (defun select-widgets (dashboard)
   (let ((widgets (select-dao 'widget (:= 'dashboard dashboard))))
     (loop for widget in widgets
-          collect (concatenate 'list
-                               (object-to-plist widget
-                                                '(order width height widget-type))
-                               (get-chart (chart widget))))))
+          collect (widget-data widget))))
+
+(defun widget-data (widget)
+  (conlist
+   (object-to-plist widget '(id order width height (widget-type |widgetType|)))
+   (get-chart-fields (chart widget))))
+
+(defun update-widget-size (id new-width new-height)
+  (let ((widget (get-dao 'widget id)))
+    (when widget
+      (with-slots (width height) widget
+        (setf width new-width
+              height new-height)
+        (update-dao widget)))))
+
+(defun recalc-order (dashboard)
+  (let ((widgets (select-dao 'widget (:= 'dashboard dashboard))))
+    (loop for w in widgets
+          for i from 0 to (length widgets)
+          do (setf (order w) i)
+          do (update-dao w)))
+  "ok")
 
