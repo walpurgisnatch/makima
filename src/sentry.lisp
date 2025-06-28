@@ -221,7 +221,7 @@
   (with-accessors ((predicate predicate) (actions actions) (recordp recordp)) handler
     (when (or (null predicate) (fcall predicate watcher))
       (when (and recordp savep) (save-record watcher))
-      (run-actions actions watcher)
+      (when actions (run-actions actions watcher))
       recordp)))
 
 (defgeneric report (watcher)
@@ -245,8 +245,7 @@
                               :interval interval :handlers handlers)))
 
 (defmethod save-watcher ((watcher watcher))
-  (prog1
-      (sethash (name watcher) watcher *watchers*)
+  (prog1 (sethash (name watcher) watcher *watchers*)
     (store-watchers)))
 
 (defmethod delete-watcher (watcher)

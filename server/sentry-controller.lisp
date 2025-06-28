@@ -30,19 +30,22 @@
   (watchers-json))
 
 (defroute "/watchers" :post (|type| |name| |target| |parser| |interval| |handlers| |page| |url|)
-  (let* ((parser `(:parser ,(makima-function |parser|)))
-         (handlers `(:handlers ,(create-handlers |handlers|)))
-         (default `(:name ,|name| :target ,|target| :interval ,(parse-integer |interval|)))
-         (args (append default parser handlers))
-         (result nil))
-    (setf result
-          (Alexandria:switch (|type| :test #'string=)
-            ("general" (apply #'create-watcher args))
-            ("html" (apply #'create-html-watcher (append args `(:page ,|page|))))
-            ("api" (apply #'create-html-watcher (append args `(:url ,|url|))))))
-    "ok"))
+  (handler-case 
+      (let* ((parser `(:parser ,(makima-function |parser|)))
+             (handlers `(:handlers ,(create-handlers |handlers|)))
+             (default `(:name ,|name| :target ,|target| :interval ,(parse-integer |interval|)))
+             (args (append default parser handlers))
+             (result nil))
+        (setf result
+              (Alexandria:switch (|type| :test #'string=)
+                ("general" (apply #'create-watcher args))
+                ("html" (apply #'create-html-watcher (append args `(:page ,|page|))))
+                ("api" (apply #'create-html-watcher (append args `(:url ,|url|))))))
+        "ok")
+    (error (e)
+      `(400 nil (,(jonathan:to-json `(:status ,(format nil "~a" e))))))))
 
-;; TODO Pack to json works only on lists
+;; Todo Pack to json works only on lists
 (defroute "/watchers/:watcher" :get (watcher)
   (ss:pack-to-json '(name value target interval "recordsCount" parsed)
                    (list (watcher-data (get-watcher watcher)))))
@@ -58,14 +61,6 @@
   (last-record-value (get-watcher watcher)))
 
 ;; utils
-(defmacro object-data (obj slots &body body)
-  `(with-accessors ,(loop for slot in slots
-                          collect (list slot slot))
-       ,obj
-     (list ,@slots ,@body)))
-
-(defmacro json-data-of (objl keys vals &body body)
-  `(ss:pack-to-json ',keys (mapcar #'(lambda (obj) (object-data obj ,vals ,@body)) ,objl)))
 
 (defun watcher-data (watcher)
   (object-data watcher (name last-record-value target interval)
@@ -80,7 +75,9 @@
     (ss:pack-to-json '(name value target interval "recordsCount" parsed) result)))
 
 (defun records-json (watcher &optional limit offset)
-  (json-data-of (records watcher :limit limit :offset offset) (id watcher value timestamp) (id watcher value timestamp)))
+  (json-data-of (records watcher :limit limit :offset offset)
+      (id watcher value timestamp)
+      (id watcher value timestamp)))
 
 (defun create-handlers (list)
   (loop for handler in list
@@ -89,12 +86,11 @@
                               :predicate (prepare-predicate (arg handler "predicate"))
                               :actions (prepare-actions (arg handler "actions")))))
 
-(defun arg (list key)
-  (cdr (find key list :key #'car :test #'string=)))
-
 (defun prepare-predicate (predicate)
-  (read-from-string (format nil "(~a)" predicate)))
+  (if predicate
+      (read-from-string (format nil "(~a)" predicate))))
 
 (defun prepare-actions (actions)
-  (read-from-string (format nil "(~{(~a)~})" actions)))
+  (if actions
+      (read-from-string (format nil "(~{(~a)~})" actions))))
 

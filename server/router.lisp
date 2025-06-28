@@ -39,7 +39,6 @@
                (handler-case
                    (with-connection (db-credentials)
                      ,@body)
-                 (error (e)
-                   (trace e)
-                   (format *standard-output* "~&Error: ~A~%" e))))))))
+                 (error (err)
+                   (format *standard-output* "~&Error: ~A~%" err))))))))
 
