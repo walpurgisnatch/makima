@@ -104,7 +104,8 @@
 (defclass record ()
   ((id        :col-type integer :initarg :id        :reader id)   
    (watcher   :col-type string  :initarg :watcher   :reader watcher)
-   (value     :col-type string  :initarg :value     :reader value)
+   (value     :col-type (or string db-null)
+                                :initarg :value     :reader value)
    (timestamp :col-type string  :initarg :timestamp :reader timestamp))
   (:metaclass dao-class)
   (:keys watcher id)
@@ -117,8 +118,8 @@
 
 (defmethod print-object ((obj handler) stream)
   (print-unreadable-object (obj stream :type t)
-    (with-accessors ((predicate predicate) (recordp recordp)) obj
-      (format stream "~a ~a" recordp predicate))))
+    (with-accessors ((name name) (predicate predicate) (actions actions) (recordp recordp)) obj
+      (format stream "~a ~a ~a ~a" name predicate actions recordp))))
 
 (defmethod print-object ((obj record) stream)
   (print-unreadable-object (obj stream :type t)
@@ -152,16 +153,6 @@
 (defmethod get-record ((watcher watcher) index)
   (with-accessors ((watcher-name name)) watcher
     (get-dao 'record watcher-name index)))
-
-(defmethod last-record ((watcher watcher))
-  (with-accessors ((watcher-name name)) watcher
-    (car (query-dao 'record
-                    (:limit
-                     (:order-by
-                      (:select '* :from 'records
-                       :where (:= 'watcher watcher-name))
-                      (:desc 'id))
-                     1)))))
 
 ;;; handlers
 (defun make-handler (&key predicate actions recordp once)
@@ -244,7 +235,7 @@
   (save-watcher (make-watcher :name name :target target :parser parser
                               :interval interval :handlers handlers)))
 
-(defmethod save-watcher ((watcher watcher))
+(defmethod save-watcher ((watcher watcher))1
   (prog1 (sethash (name watcher) watcher *watchers*)
     (store-watchers)))
 
@@ -267,3 +258,7 @@
         (setf *watchers* (restore *sentry-store*)))
     (error (e)
       (format *standard-output* "~&Error: ~A~%" e))))
+
+(defun print-watchers ()
+  (loop for watcher being the hash-values of *watchers*
+        do (print watcher)))

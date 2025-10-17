@@ -17,7 +17,8 @@
 
 (defmacro defaction (name args type doc &body body)
   `(eval-when (:load-toplevel)
-     (push (list ',type ',name ,(coerce args 'vector) ,doc) *actions-list*)
+     (unless (find ',name *actions-list* :key #'cadr)
+         (push (list ',type ',name ,(coerce args 'vector) ,doc) *actions-list*))
      (defun ,name (watcher ,@args) ,@body)))
 
 ;; actions
@@ -37,7 +38,7 @@
             :content `(("chat_id" . ,(setting "tg-user-id"))
                        ("text" . ,(apply #'format nil format args)))))
 
-(defaction run-external (&rest args) general
+(defaction run-external (&rest args) general    
   "Run external program"
   (uiop:run-program (format nil "~{~a~^ ~}" args) :output :string))
 

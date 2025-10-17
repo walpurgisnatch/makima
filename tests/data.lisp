@@ -5,7 +5,6 @@
 
 (in-package :makima/tests/data)
 
-
 (defparameter *content-data*
   '("<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:fb=\"http://ogp.me/ns/fb#\">
       <head></head>

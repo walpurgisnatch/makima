@@ -15,9 +15,7 @@
                 :with-connection)
   (:export :main
            :main-deamonless
-           :setup
-           :records-tablep
-           :create-records-table))
+           :setup))
 
 (in-package :makima)
 

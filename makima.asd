@@ -44,7 +44,8 @@
                (:module "scripts"
                 :components
                 ((:file "seed"))))
-  :in-order-to ((test-op (test-op "makima/tests"))))
+  :in-order-to ((test-op (test-op "makima/tests")))
+  )
 
 (defsystem "makima/tests"
   :depends-on ("fiveam"

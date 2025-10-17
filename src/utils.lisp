@@ -28,16 +28,10 @@
            :arg
            :object-to-plist
            :a-value
-           :conlist))
+           :conlist
+           :function-name))
 
 (in-package :makima.utils)
-
-(defun object-to-plist (obj slot-names)
-  (loop for slot in slot-names
-        append (list (if (consp slot)
-                         (intern-keyword (cadr slot))
-                         (intern-keyword-downcase slot))
-                     (slot-value obj (if (consp slot) (car slot) slot)))))
 
 (defmacro object-data (obj slots &body body)
   `(with-accessors ,(loop for slot in slots
@@ -53,6 +47,13 @@
      (if (cdr data)
          data
          (car data))))
+
+(defun object-to-plist (obj slot-names)
+  (loop for slot in slot-names
+        append (list (if (consp slot)
+                         (intern-keyword (cadr slot))
+                         (intern-keyword-downcase slot))
+                     (slot-value obj (if (consp slot) (car slot) slot)))))
 
 (defun intern-keyword-downcase (symb)
   (intern (string-downcase (string symb)) :keyword))
@@ -110,8 +111,6 @@
 (defun hours-to-sec (x)
   (* x 3600))
 
-(print (typep 43 'integer))
-
 (defun time-to-s (time-str)
   (if (typep time-str 'integer)
       time-str
@@ -144,3 +143,8 @@
 
 (defun timestamp-for-time (time-str)
   (format nil "~a" (- (get-universal-time) (time-to-s time-str))))
+
+(defun function-name (func)
+  (let ((str (format nil "~a" func)))
+    ;(subseq str 11 (1- (length str)))
+    str))

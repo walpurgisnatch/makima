@@ -18,8 +18,9 @@
   `(,fun ,@(loop for arg in args collect `(parse-float ,arg))))
 
 (defmacro defpred (name args type doc &body body)
-  `(eval-when (:load-toplevel)
-     (push (list ',type ',name ,(coerce args 'vector) ,doc) *predicates-list*)
+  `(eval-when (:load-toplevel)     
+     (unless (find ',name *predicates-list* :key #'cadr)
+       (push (list ',type ',name ,(coerce args 'vector) ,doc) *predicates-list*))
      (defun ,name (watcher ,@args) ,@body)))
 
 (defun percent-change (list)

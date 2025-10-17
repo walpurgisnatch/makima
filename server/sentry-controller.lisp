@@ -27,7 +27,9 @@
                                   makima.parsers:*parsers-list*)))
 
 (defroute "/watchers" :get ()
-  (watchers-json))
+  (jonathan:to-json
+   (loop for watcher being the hash-values of *watchers*
+         collect (watcher-data watcher))))
 
 (defroute "/watchers" :post (|type| |name| |target| |parser| |interval| |handlers| |page| |url|)
   (handler-case 
@@ -45,10 +47,8 @@
     (error (e)
       `(400 nil (,(jonathan:to-json `(:status ,(format nil "~a" e))))))))
 
-;; Todo Pack to json works only on lists
 (defroute "/watchers/:watcher" :get (watcher)
-  (ss:pack-to-json '(name value target interval "recordsCount" parsed)
-                   (list (watcher-data (get-watcher watcher)))))
+  (jonathan:to-json (watcher-data (get-watcher watcher))))
 
 (defroute "/watchers/:watcher" :delete (watcher)
   (delete-watcher watcher)
@@ -63,9 +63,14 @@
 ;; utils
 
 (defun watcher-data (watcher)
-  (object-data watcher (name last-record-value target interval)
-    (records-count watcher)
-    (format-time (last-record-timestamp watcher))))
+  (conlist
+   (object-to-plist watcher
+                    '(name target interval))
+   `(:|value| ,(last-record-value watcher)
+      :|parsed| ,(format-time (last-record-timestamp watcher))
+      :|recordsCount| ,(records-count watcher)
+      :|parser| ,(function-name (parser watcher))
+      :|handlers| ,(handlers-data watcher))))
 
 (defun watchers-json ()
   (let ((result nil))
@@ -81,16 +86,35 @@
 
 (defun create-handlers (list)
   (loop for handler in list
-        collect (make-handler :recordp (arg handler "recordp")
-                              :once (arg handler "once")
-                              :predicate (prepare-predicate (arg handler "predicate"))
-                              :actions (prepare-actions (arg handler "actions")))))
+        collect (make-handler
+                 :recordp (arg handler "recordp")
+                 :once (arg handler "once")
+                 :predicate (prepare-predicate (arg handler "predicate"))
+                 :actions (prepare-actions (arg handler "actions")))))
 
 (defun prepare-predicate (predicate)
   (if predicate
-      (read-from-string (format nil "(~a)" predicate))))
+      `(,(read-from-string (car predicate)) ,@(cdr predicate))))
 
 (defun prepare-actions (actions)
   (if actions
-      (read-from-string (format nil "(~{(~a)~})" actions))))
+      (loop for action in actions
+            collect `(,(read-from-string (car action)) ,@(cdr action)))))
+
+(defun format-actions (actions)
+  (loop for action in actions
+        collect (format-function action)))
+
+(defun format-function (func)
+  `(:|name| ,(car func)
+     :|args| ,(cdr func)))
+
+(defun handlers-data (watcher)
+  (loop for handler in (handlers watcher)
+        collect (conlist
+                 (object-to-plist
+                  handler
+                  '(name recordp once))
+                 `(:|predicate| ,(format-function (predicate handler))
+                   :|actions| ,(format-actions (actions handler))))))
 
